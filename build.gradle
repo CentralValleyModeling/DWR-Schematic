@@ -18,6 +18,7 @@ dependencies {
     }
     implementation libs.eclipse.osgi
     implementation libs.eclipse.core.resources
+    implementation libs.eclipse.debug.ui
     implementation(libs.eclipse.ui.views) {
         exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
     }
@@ -26,6 +27,18 @@ dependencies {
     }
 
     implementation(libs.jdiagram)
+
+    implementation(libs.hec.monolith)
+
+    implementation(libs.eclipse.debug.core)
+
+    implementation(libs.vista)
+
+    implementation(libs.guava)
+
+    implementation(libs.dssgui)
+
+    implementation(libs.swixml)
 
     implementation(libs.wrims.core)
 }
