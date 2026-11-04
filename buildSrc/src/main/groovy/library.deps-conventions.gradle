@@ -1,0 +1,5 @@
+// Define a standard set of repositories, a specific library may need to customize this list and add or remove some items
+repositories {
+    // The primary public Maven repository, Maven Central where most 3rd party dependencies can be found
+    mavenCentral()
+}

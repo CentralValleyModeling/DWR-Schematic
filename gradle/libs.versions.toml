@@ -1,0 +1,15 @@
+# Once versions / libraries / bundles have been declared here, they can be accessed by all projects in the build.
+# To reference them, the syntax "libs.versions" for [versions], "libs.library-name-here" for [libraries], and
+# "libs.bundles.bundle-name-here" for [bundles].
+#
+# Relevant Gradle documentation: https://docs.gradle.org/8.5/userguide/platforms.html
+
+[versions]
+junit5 = "5.10.2"
+
+[libraries]
+junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
+junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+
+[bundles]
+junit5 = ["junit-jupiter-api", "junit-jupiter-engine"]
