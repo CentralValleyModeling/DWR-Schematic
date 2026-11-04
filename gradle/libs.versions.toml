@@ -5,9 +5,29 @@
 # Relevant Gradle documentation: https://docs.gradle.org/8.5/userguide/platforms.html
 
 [versions]
+eclipse-swt = "3.133.0"
+eclipse-ui = "3.208.0"
+eclipse-jface = "3.39.0"
+eclipse-osgi = "3.24.100"
+eclipse-core-resources = "3.23.200"
+eclipse-ui-views = "3.13.0"
+eclipse-search = "3.18.0"
+jdiagram = "4.3.1"
 junit5 = "5.10.2"
+wrims = "3.0.0-alpha.11"
 
 [libraries]
+eclipse-swt = { module = "org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64", version.ref = "eclipse-swt"}
+eclipse-ui = { module = "org.eclipse.platform:org.eclipse.ui", version.ref = "eclipse-ui" }
+eclipse-jface = { module = "org.eclipse.platform:org.eclipse.jface", version.ref = "eclipse-jface" }
+eclipse-osgi = { module = "org.eclipse.platform:org.eclipse.osgi", version.ref = "eclipse-osgi" }
+eclipse-core-resources = { module = "org.eclipse.platform:org.eclipse.core.resources", version.ref = "eclipse-core-resources" }
+eclipse-ui-views = { module = "org.eclipse.platform:org.eclipse.ui.views", version.ref = "eclipse-ui-views" }
+eclipse-search = { module = "org.eclipse.platform:org.eclipse.search", version.ref = "eclipse-search" }
+jdiagram = { module = "com.mindfusion:jdiagram", version.ref = "jdiagram" }
+
+wrims-core = { module = "gov.ca.water:wrims-core", version.ref = "wrims" }
+
 junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
 junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
 

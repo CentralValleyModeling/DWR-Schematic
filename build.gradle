@@ -5,6 +5,29 @@ plugins {
 
 dependencies {
     testImplementation(libs.bundles.junit5)
+
+    //eclipse libs
+    implementation(libs.eclipse.swt) {
+        exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
+    }
+    implementation(libs.eclipse.ui) {
+        exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
+    }
+    implementation(libs.eclipse.jface) {
+        exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
+    }
+    implementation libs.eclipse.osgi
+    implementation libs.eclipse.core.resources
+    implementation(libs.eclipse.ui.views) {
+        exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
+    }
+    implementation(libs.eclipse.search) {
+        exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
+    }
+
+    implementation(libs.jdiagram)
+
+    implementation(libs.wrims.core)
 }
 
 def licenseKey = (findProperty('mindfusionLicenseKey') ?: System.getenv('MINDFUSION_LICENSE_KEY'))?.toString()?.trim()
