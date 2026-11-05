@@ -41,6 +41,8 @@ dependencies {
     implementation(libs.swixml)
 
     implementation(libs.wrims.core)
+
+    implementation fileTree(dir: 'src/main/resources', include: ['*.jar'])
 }
 
 def licenseKey = (findProperty('mindfusionLicenseKey') ?: System.getenv('MINDFUSION_LICENSE_KEY'))?.toString()?.trim()
