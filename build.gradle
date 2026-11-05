@@ -32,16 +32,6 @@ dependencies {
 
     implementation(libs.eclipse.debug.core)
 
-    implementation(libs.vista)
-
-    implementation(libs.guava)
-
-    implementation(libs.dssgui)
-
-    implementation(libs.swixml)
-
-    implementation(libs.wrims.core)
-
     implementation fileTree(dir: 'src/main/resources', include: ['*.jar'])
 }
 

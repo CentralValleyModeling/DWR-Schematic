@@ -15,13 +15,9 @@ eclipse-core-resources = "3.23.200"
 eclipse-ui-views = "3.13.0"
 eclipse-search = "3.18.0"
 jdiagram = "4.3.1"
-junit5 = "5.10.2"
+junit_5 = "6.1.0"
+junit_5_platform = "6.1.0"
 hec-monolith = "6.0.0"
-vista = "2014.05.20"
-guava = "33.7.2-jre"
-dssgui = "3.4.18"
-swixml = "2007.03.28"
-wrims = "3.0.0-alpha.11"
 
 [libraries]
 eclipse-swt = { module = "org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64", version.ref = "eclipse-swt"}
@@ -35,19 +31,14 @@ eclipse-ui-views = { module = "org.eclipse.platform:org.eclipse.ui.views", versi
 eclipse-search = { module = "org.eclipse.platform:org.eclipse.search", version.ref = "eclipse-search" }
 
 hec-monolith = { module = "mil.army.usace.hec:hec-monolith", version.ref = "hec-monolith" }
-dssgui = { module = "mil.army.usace.hec:dssgui", version.ref = "dssgui" }
-
-vista = { module = "gov.ca.dwr:vista", version.ref = "vista" }
-
-guava = { module = "com.google.guava:guava", version.ref = "guava"}
-swixml = { module = "org.swixml:swixml", version.ref = "swixml" }
 
 jdiagram = { module = "com.mindfusion:jdiagram", version.ref = "jdiagram" }
 
-wrims-core = { module = "gov.ca.water:wrims-core", version.ref = "wrims" }
-
-junit-jupiter-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit5" }
-junit-jupiter-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit5" }
+junit-5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit_5" }
+junit-5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit_5" }
+junit-5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit_5" }
+junit-5-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit_5_platform" }
+junit-5-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit_5_platform" }
 
 [bundles]
-junit5 = ["junit-jupiter-api", "junit-jupiter-engine"]
+junit5 = [ "junit-5-engine", "junit-5-api", "junit-5-params", "junit-5-platform-engine", "junit-5-platform-launcher" ]
