@@ -1,17 +1,10 @@
-plugins{
+plugins {
     id 'library.deps-conventions'
     id 'library.java-conventions'
-    id 'library.jdeps-conventions'
-
-    // The following plugin is used to build the OSGI bundle
-    id 'biz.aQute.bnd.builder' version '7.2.3'
 }
 
 dependencies {
-    //module dependencies
-    implementation project(':third-party')
-    implementation project(':wrims-ide')
-    implementation project(':dwr-hecdssvue')
+    testImplementation(libs.bundles.junit)
 
     //eclipse libs
     implementation(libs.eclipse.swt) {
@@ -25,6 +18,7 @@ dependencies {
     }
     implementation libs.eclipse.osgi
     implementation libs.eclipse.core.resources
+    implementation libs.eclipse.debug.ui
     implementation(libs.eclipse.ui.views) {
         exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
     }
@@ -32,7 +26,13 @@ dependencies {
         exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
     }
 
-    testImplementation(libs.bundles.junit5)
+    implementation(libs.jdiagram)
+
+    implementation(libs.hec.monolith)
+
+    implementation(libs.eclipse.debug.core)
+
+    implementation fileTree(dir: 'src/main/resources', include: ['*.jar'])
 }
 
 def licenseKey = (findProperty('mindfusionLicenseKey') ?: System.getenv('MINDFUSION_LICENSE_KEY'))?.toString()?.trim()
@@ -68,4 +68,3 @@ processResources {
         include 'mindfusion-license.properties'
     }
 }
-
