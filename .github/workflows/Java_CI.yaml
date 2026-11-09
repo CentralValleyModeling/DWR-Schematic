@@ -23,7 +23,7 @@ jobs:
           DEP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: bash
         run: |
-          curl --fail -i -u "dwr-wrims-build:$DEP_TOKEN" \
+          curl --fail -i -u "$DEP_TOKEN" \
             https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies/com.google.ortools/linearsolver/2013-01-10/linearsolver-2013-01-10.jar
 
       - name: Set up JDK 21
@@ -38,8 +38,8 @@ jobs:
         env:
           DEP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
-          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+          ./gradlew clean -PcvmUserId="$DEP_TOKEN" -PcvmPassword="$DEP_TOKEN"
+          ./gradlew build -PcvmUserId="$DEP_TOKEN" -PcvmPassword="$DEP_TOKEN"
 
       - name: Publish package
         shell: bash
@@ -47,4 +47,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           DEP_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew publish -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+        run: ./gradlew publish -PcvmUserId="$DEP_TOKEN" -PcvmPassword="$DEP_TOKEN"
