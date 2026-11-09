@@ -14,7 +14,6 @@ eclipse-osgi = "3.24.100"
 eclipse-core-resources = "3.23.200"
 eclipse-ui-views = "3.13.0"
 eclipse-search = "3.18.0"
-jdiagram = "4.3.1"
 junit = "6.1.0"
 junit_platform = "6.1.0"
 hec-monolith = "6.0.0" # Maximum version with DSS6 support
@@ -31,8 +30,6 @@ eclipse-ui-views = { module = "org.eclipse.platform:org.eclipse.ui.views", versi
 eclipse-search = { module = "org.eclipse.platform:org.eclipse.search", version.ref = "eclipse-search" }
 
 hec-monolith = { module = "mil.army.usace.hec:hec-monolith", version.ref = "hec-monolith" }
-
-jdiagram = { module = "com.mindfusion:jdiagram", version.ref = "jdiagram" }
 
 junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
 junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }

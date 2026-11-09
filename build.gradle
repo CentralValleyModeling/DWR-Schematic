@@ -26,13 +26,11 @@ dependencies {
         exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
     }
 
-    implementation(libs.jdiagram)
-
     implementation(libs.hec.monolith)
 
     implementation(libs.eclipse.debug.core)
 
-    implementation fileTree(dir: 'src/main/resources', include: ['*.jar'])
+    implementation fileTree(dir: 'src/main/resources/jars/', include: ['*.jar'])
 }
 
 def licenseKey = (findProperty('mindfusionLicenseKey') ?: System.getenv('MINDFUSION_LICENSE_KEY'))?.toString()?.trim()
