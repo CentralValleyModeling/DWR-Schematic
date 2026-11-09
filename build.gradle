@@ -4,7 +4,7 @@ plugins {
 }
 
 dependencies {
-    testImplementation(libs.bundles.junit5)
+    testImplementation(libs.bundles.junit)
 
     //eclipse libs
     implementation(libs.eclipse.swt) {

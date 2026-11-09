@@ -15,8 +15,8 @@ eclipse-core-resources = "3.23.200"
 eclipse-ui-views = "3.13.0"
 eclipse-search = "3.18.0"
 jdiagram = "4.3.1"
-junit_5 = "6.1.0"
-junit_5_platform = "6.1.0"
+junit = "6.1.0"
+junit_platform = "6.1.0"
 hec-monolith = "6.0.0" # Maximum version with DSS6 support
 
 [libraries]
@@ -34,11 +34,11 @@ hec-monolith = { module = "mil.army.usace.hec:hec-monolith", version.ref = "hec-
 
 jdiagram = { module = "com.mindfusion:jdiagram", version.ref = "jdiagram" }
 
-junit-5-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit_5" }
-junit-5-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit_5" }
-junit-5-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit_5" }
-junit-5-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit_5_platform" }
-junit-5-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit_5_platform" }
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit_platform" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit_platform" }
 
 [bundles]
-junit5 = [ "junit-5-engine", "junit-5-api", "junit-5-params", "junit-5-platform-engine", "junit-5-platform-launcher" ]
+junit = [ "junit-engine", "junit-api", "junit-params", "junit-platform-engine", "junit-platform-launcher" ]
