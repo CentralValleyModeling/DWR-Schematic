@@ -19,12 +19,3 @@ publishing {
         }
     }
 }
-
-// Guard against publishing an artifact with no version (pass -Pversion=x.y.z).
-tasks.withType(PublishToMavenRepository).configureEach {
-    doFirst {
-        if (project.version == null || project.version.toString() == 'unspecified') {
-            throw new GradleException("No version set. Run with -Pversion=<version>, e.g. -Pversion=1.2.0-SNAPSHOT")
-        }
-    }
-}

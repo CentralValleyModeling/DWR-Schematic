@@ -5,19 +5,18 @@ plugins {
     id 'library.publishing-conventions'
 }
 
-// This utilizes Git Tag based versioning to set the version of the project based on the current Git Branch or Tag.
-// If a tag is checked out, the version will be the name of the most recent tag on this commit.
-// Otherwise, the version will be last version suffixed with a +
-def versionLabel(gitInfo) {
-    def branch = gitInfo.branchName // all branches are snapshots, only tags get released
+static def versionLabel(gitInfo) {
+    def branch = gitInfo.branchName
     def tag = gitInfo.lastTag
-    def defaultVersion = tag + ".9999"
-    def isNumericTag = gitInfo.lastTag ==~ /^\d+\.\d+\.\d+.*/
-    if(!isNumericTag) {
-        defaultVersion = "1.0.0.9999"
+    def distance = gitInfo.commitDistance
+
+    // If exactly on a tagged commit, use the tag regardless of branch
+    if (distance == 0 && tag != null) {
+        return tag
     }
-    // tag is returned as is. Branch may need cleanup
-    return branch == null ? tag : defaultVersion
+
+    // Otherwise use branch-based snapshot version
+    return branch == null ? tag : "99." + branch.replace("/","-") + "-SNAPSHOT"
 }
 
 allprojects {
