@@ -1,7 +1,11 @@
 plugins {
     id 'library.deps-conventions'
     id 'library.java-conventions'
+    id 'library.publishing-conventions'
 }
+
+group = 'gov.ca.water'
+// Version is supplied by CI via -Pversion=<version>
 
 dependencies {
     testImplementation(libs.bundles.junit)
