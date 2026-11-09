@@ -1,0 +1,44 @@
+# Once versions / libraries / bundles have been declared here, they can be accessed by all projects in the build.
+# To reference them, the syntax "libs.versions" for [versions], "libs.library-name-here" for [libraries], and
+# "libs.bundles.bundle-name-here" for [bundles].
+#
+# Relevant Gradle documentation: https://docs.gradle.org/8.5/userguide/platforms.html
+
+[versions]
+eclipse-swt = "3.133.0"
+eclipse-debug-core = "3.23.200"
+eclipse-debug-ui = "3.20.0"
+eclipse-ui = "3.208.0"
+eclipse-jface = "3.39.0"
+eclipse-osgi = "3.24.100"
+eclipse-core-resources = "3.23.200"
+eclipse-ui-views = "3.13.0"
+eclipse-search = "3.18.0"
+jdiagram = "4.3.1"
+junit = "6.1.0"
+junit_platform = "6.1.0"
+hec-monolith = "6.0.0" # Maximum version with DSS6 support
+
+[libraries]
+eclipse-swt = { module = "org.eclipse.platform:org.eclipse.swt.win32.win32.x86_64", version.ref = "eclipse-swt"}
+eclipse-ui = { module = "org.eclipse.platform:org.eclipse.ui", version.ref = "eclipse-ui" }
+eclipse-jface = { module = "org.eclipse.platform:org.eclipse.jface", version.ref = "eclipse-jface" }
+eclipse-debug-core = { module = "org.eclipse.platform:org.eclipse.debug.core", version.ref = "eclipse-debug-core" }
+eclipse-debug-ui = { module = "org.eclipse.platform:org.eclipse.debug.ui", version.ref = "eclipse-debug-ui" }
+eclipse-osgi = { module = "org.eclipse.platform:org.eclipse.osgi", version.ref = "eclipse-osgi" }
+eclipse-core-resources = { module = "org.eclipse.platform:org.eclipse.core.resources", version.ref = "eclipse-core-resources" }
+eclipse-ui-views = { module = "org.eclipse.platform:org.eclipse.ui.views", version.ref = "eclipse-ui-views" }
+eclipse-search = { module = "org.eclipse.platform:org.eclipse.search", version.ref = "eclipse-search" }
+
+hec-monolith = { module = "mil.army.usace.hec:hec-monolith", version.ref = "hec-monolith" }
+
+jdiagram = { module = "com.mindfusion:jdiagram", version.ref = "jdiagram" }
+
+junit-engine = { module = "org.junit.jupiter:junit-jupiter-engine", version.ref = "junit" }
+junit-api = { module = "org.junit.jupiter:junit-jupiter-api", version.ref = "junit" }
+junit-params = { module = "org.junit.jupiter:junit-jupiter-params", version.ref = "junit" }
+junit-platform-engine = { module = "org.junit.platform:junit-platform-engine", version.ref = "junit_platform" }
+junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher", version.ref = "junit_platform" }
+
+[bundles]
+junit = [ "junit-engine", "junit-api", "junit-params", "junit-platform-engine", "junit-platform-launcher" ]

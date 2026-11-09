@@ -1,0 +1,11 @@
+plugins {
+    id 'groovy-gradle-plugin'
+}
+
+dependencies {
+    implementation 'org.owasp:dependency-check-gradle:12.2.2'
+}
+
+repositories {
+    gradlePluginPortal() // so that external plugins can be resolved in dependencies section
+}
