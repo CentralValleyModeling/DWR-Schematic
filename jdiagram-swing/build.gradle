@@ -3,3 +3,29 @@ plugins {
     id 'library.java-conventions'
     id 'library.publishing-conventions'
 }
+
+sourceSets {
+    src {
+        java {
+            srcDir "src/main/java"
+        }
+    }
+}
+
+dependencies {
+
+}
+
+tasks.register("createBuildPropertiesFile", WriteProperties) { t ->
+    destinationFile = layout.buildDirectory.dir("resources/main").map {
+        it.file("jdiagram-swing-build.properties")
+    }
+    comment = "this file is automatically created at build time, edits will be overwritten"
+    property("version", project.version)
+    property("gradle.version", gradle.gradleVersion)
+    property("build.time", new Date().toString())
+}
+
+tasks.named('processResources') {
+    dependsOn tasks.named('createBuildPropertiesFile')
+}
