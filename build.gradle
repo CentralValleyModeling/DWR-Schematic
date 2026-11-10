@@ -1,6 +1,27 @@
 plugins {
+    id "com.palantir.git-version" version "5.0.0"
     id 'library.deps-conventions'
     id 'library.java-conventions'
+    id 'library.publishing-conventions'
+}
+
+static def versionLabel(gitInfo) {
+    def branch = gitInfo.branchName
+    def tag = gitInfo.lastTag
+
+    // Use the tag only on a clean tagged commit (HEAD is exactly on the tag and there are no
+    // uncommitted changes). Local development with a dirty working tree falls through to the branch.
+    if (gitInfo.isCleanTag && tag != null) {
+        return tag
+    }
+
+    // Otherwise use branch-based snapshot version (detached HEAD without a branch falls back to the tag)
+    return branch == null ? tag : "99." + branch.replace("/","-") + "-SNAPSHOT"
+}
+
+allprojects {
+    group = 'gov.ca.water'
+    version = versionLabel(versionDetails())
 }
 
 dependencies {
@@ -26,13 +47,11 @@ dependencies {
         exclude group: "org.eclipse.platform", module: "org.eclipse.swt"
     }
 
-    implementation(libs.jdiagram)
-
     implementation(libs.hec.monolith)
 
     implementation(libs.eclipse.debug.core)
 
-    implementation fileTree(dir: 'src/main/resources', include: ['*.jar'])
+    implementation fileTree(dir: 'src/main/resources/jars/', include: ['*.jar'])
 }
 
 def licenseKey = (findProperty('mindfusionLicenseKey') ?: System.getenv('MINDFUSION_LICENSE_KEY'))?.toString()?.trim()
