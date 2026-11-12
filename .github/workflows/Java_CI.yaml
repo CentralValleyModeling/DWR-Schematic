@@ -27,9 +27,11 @@ jobs:
 
       - name: Build with Gradle
         shell: bash
+        env:
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
         run: |
-          ./gradlew clean
-          ./gradlew build
+          ./gradlew clean -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
+          ./gradlew build -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"
 
       - name: Run tests
         shell: bash
@@ -40,5 +42,5 @@ jobs:
         shell: bash
         if: startsWith(github.ref, 'refs/tags/')
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: ./gradlew publish -Pversion=${GITHUB_REF_NAME#v}
+          DEP_TOKEN: ${{ secrets.WRIMS_ENGINE_DEPENDENCIES_TOKEN }}
+        run: ./gradlew publish -PcvmUserId="dwr-wrims-build" -PcvmPassword="$DEP_TOKEN"

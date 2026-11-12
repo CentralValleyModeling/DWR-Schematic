@@ -29,5 +29,7 @@ dependencies {
 
     implementation(libs.eclipse.debug.core)
 
+    implementation(libs.jdiagram)
+
     implementation fileTree(dir: 'src/main/resources/jars/', include: ['*.jar'])
 }

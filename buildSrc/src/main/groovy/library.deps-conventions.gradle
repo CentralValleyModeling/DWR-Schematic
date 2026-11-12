@@ -1,8 +1,26 @@
+def checkForGHCredentials() {
+    if (!project.hasProperty('cvmUserId')) {
+        println('Please set the cvmUserId property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PcvmUserId= .')
+    }
+    if (!project.hasProperty('cvmPassword')) {
+        println('Please set the cvmPassword property in the GRADLE_USER_HOME ($userHome/.gradle/gradle.properties) file or via -PcvmPassword= .')
+    }
+}
+
 // Define a standard set of repositories, a specific library may need to customize this list and add or remove some items
 repositories {
     maven {
         // The HEC Public repository where a lot of base dependencies are stored like hec-monolith
         url = 'https://www.hec.usace.army.mil/nexus/repository/maven-public'
+    }
+
+    maven {
+        url = 'https://maven.pkg.github.com/CentralValleyModeling/wrims-engine-dependencies'
+        credentials {
+            checkForGHCredentials()
+            username = "$cvmUserId"
+            password = "$cvmPassword"
+        }
     }
 
     // The primary public Maven repository, Maven Central where most 3rd party dependencies can be found
