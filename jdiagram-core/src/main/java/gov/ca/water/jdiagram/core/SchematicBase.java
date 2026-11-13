@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.google.common.flogger.FluentLogger;
+import gov.ca.water.jdiagram.core.utils.TimeOps;
 
 import hec.heclib.dss.CondensedReference;
 import hec.heclib.dss.DSSPathname;
@@ -179,7 +180,7 @@ public class SchematicBase
 		if (month == 13) {
 			year = startDate.year() + 1;
 		}
-		String monthName = SchematicDataSource.getMonthText(month);
+		String monthName = TimeOps.getMonthText(month);
 		endDate.setDate(monthName + year);
 		endDate.add(-1440);
 
@@ -230,7 +231,7 @@ public class SchematicBase
 							} else {
 								year = ht.year();
 							}
-							ht.setDate(SchematicDataSource.getMonthText(month)
+							ht.setDate(TimeOps.getMonthText(month)
 									+ year);
 						}
 						if (inRange) {
@@ -264,7 +265,7 @@ public class SchematicBase
 		if (month == 13) {
 			year = startDate.year() + 1;
 		}
-		String monthName = SchematicDataSource.getMonthText(month);
+		String monthName = TimeOps.getMonthText(month);
 		endDate.setDate(monthName + year);
 		endDate.add(-1440);
 
@@ -315,7 +316,7 @@ public class SchematicBase
 							} else {
 								year = ht.year();
 							}
-							ht.setDate(SchematicDataSource.getMonthText(month)
+							ht.setDate(TimeOps.getMonthText(month)
 									+ year);
 						}
 						if (inRange) {
@@ -652,7 +653,7 @@ public class SchematicBase
 
 	public static HashMap<String, String> generatePathnameMap(HecDss file){
 		HashMap<String, String> pathnameMap=new HashMap<> ();
-		Vector<CondensedReference> v = SchematicDataSource.getCondensedReferences(file);
+		Vector<CondensedReference> v = TimeOps.getCondensedReferences(file);
 		for (int i = 0; i < v.size(); i++){
 			CondensedReference cr = v.get(i);
 			String pathname = cr.getNominalPathname();
