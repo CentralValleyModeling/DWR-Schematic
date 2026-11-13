@@ -23,7 +23,7 @@ import hec.io.TimeSeriesContainer;
 
 public class SchematicBase
 {
-	FluentLogger logger = FluentLogger.forEnclosingClass();
+	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
 	private static final double FACTOR = 1000. * 43560 / (24 * 60 * 60);
 
