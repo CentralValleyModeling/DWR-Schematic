@@ -1,5 +1,6 @@
 package gov.ca.water.jdiagram.core;
 
+import java.time.Month;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -21,7 +22,7 @@ import hec.hecmath.HecMath;
 import hec.hecmath.HecMathException;
 import hec.io.TimeSeriesContainer;
 
-public class SchematicBase
+public class SchematicPanelBase
 {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
@@ -33,17 +34,25 @@ public class SchematicBase
 
 	private final SchematicHost host;
 
-	public SchematicBase(SchematicDataSource source, SchematicHost host) {
+	public SchematicPanelBase(SchematicDataSource source, SchematicHost host) {
 		this.dataSource = source;
 		this.host = host;
+	}
+
+	public SchematicHost getHost() {
+		return host;
+	}
+
+	public SchematicDataSource getDataSource() {
+		return dataSource;
 	}
 
 	public Hashtable<String, String>[] retrieveUndebug(String date, Hashtable<String, Object> names) {
 		List<String> tws = host.getSchematicTwSelections();
 		for (int i = 0; i < tws.size() - 1; i++) {
 			if (date.equals(tws.get(i + 1))) {
-				if (host.getUnits().equals(SchematicHost.cfs)) {
-					if (host.getMonths().size() < 12) {
+				if (dataSource.units().equals(dataSource.cfs())) {
+					if (dataSource.months().size() < 12) {
 						return retrieveLongTermAverageSelectedMonths(date, names, true);
 					} else {
 						if (!host.getLongTermAverageDataCFS().containsKey(i)) {
@@ -52,7 +61,7 @@ public class SchematicBase
 						return retrieveLongTermAverage(i, names, true);
 					}
 				} else {
-					if (host.getMonths().size() < 12){
+					if (dataSource.months().size() < 12){
 						return retrieveLongTermAverageSelectedMonths(date, names, false);
 					}else{
 						if (!host.getLongTermAverageDataTAF().containsKey(i)) {
@@ -86,14 +95,14 @@ public class SchematicBase
 					if (host.getSchematicVariableData(k).containsKey(name)) {
 						try {
 							HecMath dataSet = host.getSchematicVariableData(k).get(name);
-							if (host.getAllStorageNames().contains(name)) {
+							if (dataSource.storageNames().contains(name)) {
 								isStorage=true;
 							}
 							TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
 							if (tsc != null) {
-								boolean isTAFSelected = host.getUnits().equalsIgnoreCase("taf");
+								boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
 								tsc = unitsConversion(isStorage, tsc, isTAFSelected, k, name);
-								if (host.getUnits().equals("TAF") && tsc.units.equals("TAF") && !SchematicHost.isTAFMonthly) {
+								if (dataSource.units().equals("TAF") && tsc.units.equals("TAF") && !getDataSource().isTAFMonthly()) {
 									tsc = convertAnnualTAFData(tsc); // CB added constant IV
 								}
 								HecTime hecStartTime = new HecTime();
@@ -115,7 +124,7 @@ public class SchematicBase
 									}
 								}
 
-								if (host.getMode().equals(SchematicHost.diff)) {
+								if (dataSource.mode().equals(dataSource.diff())) {
 									if (k > baseIndex) {
 										if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 											results[k].put(name,"N/A");
@@ -202,10 +211,10 @@ public class SchematicBase
 					boolean isStorage = false;
 					try {
 						TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
-						if (host.getAllStorageNames().contains(name)) {
+						if (dataSource.storageNames().contains(name)) {
 							isStorage = true;
 						}
-						boolean isTAFSelected = host.getUnits().equalsIgnoreCase("taf");
+						boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
 						tsc = unitsConversion(isStorage, tsc, isTAFSelected, i, name);
 						ht.set(startDate);
 						hecStartTime.set(tsc.startTime);
@@ -287,10 +296,10 @@ public class SchematicBase
 					boolean isStorage = false;
 					try {
 						TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
-						if (host.getAllStorageNames().contains(name)) {
+						if (dataSource.storageNames().contains(name)) {
 							isStorage = true;
 						}
-						boolean isTAFSelected = host.getUnits().equalsIgnoreCase("taf");
+						boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
 						tsc = unitsConversion(isStorage, tsc, isTAFSelected, i, name);
 						ht.set(startDate);
 						hecStartTime.set(tsc.startTime);
@@ -299,7 +308,7 @@ public class SchematicBase
 						double sum = 0.0;
 						boolean inRange = false;
 						while (ht.compareTimes(hecEndTime) <= 0 && ht.compareTimes(endDate) <= 0) {
-							if (ht.compareTimes(hecStartTime) >= 0 && host.getMonths().contains(ht.month())) {
+							if (ht.compareTimes(hecStartTime) >= 0 && dataSource.months().contains(Month.of(ht.month()))) {
 								int valueIndex = (ht.year() - hecStartTime
 										.year())
 										* 12
@@ -371,11 +380,11 @@ public class SchematicBase
 							value = "N/A";
 						} else {
 							value = data + " " + units;
-							if (host.getUnits().equals("TAF") && !SchematicHost.isTAFMonthly){
+							if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()){
 								value = data * 12 + " " + units;
 							}
 						}
-						if (host.getMode().equals(SchematicHost.diff)) {
+						if (dataSource.mode().equals(dataSource.diff())) {
 							if (k > baseIndex) {
 								if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 									results[k].put(name,"N/A");
@@ -387,7 +396,7 @@ public class SchematicBase
 								try {
 									double baseVal = Double.parseDouble(baseFields[0]);
 									double altVal = Double.parseDouble(altFields[0]);
-									if (host.getUnits().equals("TAF") && !SchematicHost.isTAFMonthly) {
+									if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()) {
 										baseVal = baseVal * 12;
 										altVal = altVal * 12;
 									}
@@ -445,11 +454,11 @@ public class SchematicBase
 							value = "N/A";
 						} else {
 							value = data + " " + units;
-							if (host.getUnits().equals("TAF") && !SchematicHost.isTAFMonthly){
+							if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()){
 								value = data * 12 + " " + units;
 							}
 						}
-						if (host.getMode().equals(SchematicHost.diff)) {
+						if (dataSource.mode().equals(dataSource.diff())) {
 							if (k > baseIndex) {
 								if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 									results[k].put(name,"N/A");
@@ -461,7 +470,7 @@ public class SchematicBase
 								try {
 									double baseVal = Double.parseDouble(baseFields[0]);
 									double altVal = Double.parseDouble(altFields[0]);
-									if (host.getUnits().equals("TAF") && !SchematicHost.isTAFMonthly) {
+									if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()) {
 										baseVal = baseVal * 12;
 										altVal = altVal * 12;
 									}
@@ -507,13 +516,13 @@ public class SchematicBase
 						try {
 							HecMath dataSet = host.getSchematicVariableData(k).get(name);
 							if (dataSet !=null) {
-								if (host.getAllStorageNames().contains(name)) {
+								if (dataSource.storageNames().contains(name)) {
 									isStorage = true;
 								}
 								TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
-								boolean isTAFSelected = host.getUnits().equalsIgnoreCase("taf");
+								boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
 								tsc = unitsConversion(isStorage, tsc, isTAFSelected, k, name);
-								if (host.getUnits().equals("TAF") && tsc.units.equals("TAF") && !SchematicHost.isTAFMonthly) {
+								if (dataSource.units().equals("TAF") && tsc.units.equals("TAF") && !dataSource.isTAFMonthly()) {
 									tsc = convertAnnualTAFData(tsc); // CB added constant IV
 								}
 								HecTime hecStartTime = new HecTime();
@@ -535,7 +544,7 @@ public class SchematicBase
 									}
 								}
 
-								if (host.getMode().equals(SchematicHost.diff)) {
+								if (dataSource.mode().equals(dataSource.diff())) {
 									if (k > baseIndex) {
 										if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 											results[k].put(name,"N/A");
@@ -563,9 +572,8 @@ public class SchematicBase
 							}
 						} catch (Exception e) {
 							logger.atSevere().withCause(e).log("Error encountered");
-							// WPPException.handleException(e); // TODO: Update with new exception handler
+							host.reportError(e);
 						}
-
 					}
 				}
 			}
@@ -575,7 +583,7 @@ public class SchematicBase
 
 	public TimeSeriesContainer unitsConversion(boolean isStorage, TimeSeriesContainer dataSet, boolean force, int index, String name) {
 
-		if ((host.getUnits().equals("TAF") || force || isStorage)
+		if ((dataSource.units().equals("TAF") || force || isStorage)
 				&& dataSet.units.equals("CFS")) {
 			// CB dataSet = adjustMonthlyData(dataSet, 1.9834631 / 1000.);
 			dataSet = adjustMonthlyData(dataSet, true); // CB added constant IV FACTOR
@@ -584,7 +592,7 @@ public class SchematicBase
 			dataSet.units = "TAF";
 			host.getAllSchematicVariableUnitsTAF(index).put(name, "TAF");
 
-		} else if (host.getUnits().equals("CFS") && dataSet.units.equals("TAF")
+		} else if (dataSource.units().equals("CFS") && dataSet.units.equals("TAF")
 				&& !force && !isStorage) { // CB added section
 			dataSet = adjustMonthlyData(dataSet, false); // CB added constant IV
 			// FACTOR so do not
@@ -662,6 +670,49 @@ public class SchematicBase
 			pathnameMap.put(partB, pathname);
 		}
 		return pathnameMap;
+	}
+
+	public String truncateAfterDecimal(String value, int i,
+			boolean displayUnits) {
+		if (value == null) {
+			return null;
+		}
+		String[] fields = value.split("\\s");
+		if (fields.length < 2) {
+			return value;
+		}
+		return String.format("%." + i + "f %s", Double.parseDouble(fields[0]),
+				displayUnits ? fields[1] : "");
+	}
+
+	public String getToolTip(int index, int studyId, boolean isDiff) {
+		if (index==0){
+			if (studyId == baseIndex){
+				return "Alt "+studyId;
+			}else if (studyId>baseIndex){
+				if (isDiff){
+					return "Alt "+studyId+" - " +"Alt "+baseIndex;
+				}else{
+					return "Alt "+studyId;
+				}
+			}else{
+				return "";
+			}
+		}else{
+			switch (studyId) {
+				case 0:
+					return "Debug";
+				case 1:
+					return isDiff ? "Alt 1 - Debug" : "Alt 1";
+				case 2:
+					return isDiff ? "Alt 2 - Debug" : "Alt 2";
+				case 3:
+					return isDiff ? "Alt 3 - Debug" : "Alt 3";
+				case 4:
+					return isDiff ? "Alt 4 - Debug" : "Alt 4";
+			}
+			return "";
+		}
 	}
 
 	public void loadAllSchematicVariableData(){
