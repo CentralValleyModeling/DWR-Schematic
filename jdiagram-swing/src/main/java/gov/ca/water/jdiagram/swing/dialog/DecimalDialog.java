@@ -6,17 +6,21 @@ import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
+import gov.ca.water.jdiagram.swing.DataPresenter;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
-public class DecimalDialog extends JDialog
+public final class DecimalDialog extends JDialog
 {
 	private static String DECIMAL_PLACES = "decimalPlaces";
-	private SchematicPanel schematic;
+	private final SchematicPanel schematic;
+	private final transient DataPresenter presenter;
 
-	public DecimalDialog(JFrame parent, SchematicPanel schematic) {
+	public DecimalDialog(JFrame parent, SchematicPanel schematic, DataPresenter presenter) {
 		super(parent);
 		this.schematic = schematic;
+		this.presenter = presenter;
 		setTitle("Set Decimal Places");
 	}
 
@@ -37,17 +41,17 @@ public class DecimalDialog extends JDialog
 
 		JLabel label = new JLabel();
 		label.setText("Decimal Places:");
-		label.setHorizontalAlignment(JLabel.LEFT);
+		label.setHorizontalAlignment(SwingConstants.LEFT);
 		frame.add(label);
 
 		final JTextField decimalText = new JTextField();
 		frame.add(decimalText);
 		decimalText.setText(String.valueOf(schematic.getBase().getHost().getPreferences().getInt(DECIMAL_PLACES, 0)));
-		decimalText.setHorizontalAlignment(JTextField.LEFT);
+		decimalText.setHorizontalAlignment(SwingConstants.LEFT);
 
 		JButton ok = new JButton();
 		ok.setText("OK");
-		ok.setHorizontalAlignment(JButton.LEFT);
+		ok.setHorizontalAlignment(SwingConstants.LEFT);
 		ok.addActionListener(e -> {
 			final int numberDecimals = Integer.parseInt(decimalText.getText());
 			schematic.getBase().getHost().getPreferences().putInt(DECIMAL_PLACES, numberDecimals);
@@ -58,8 +62,8 @@ public class DecimalDialog extends JDialog
 					schematic.refreshValues(1, false);
 				}
 			}
-			if (schematic.getBase().getHost().mtp() != null){
-				schematic.getBase().getHost().setMtpDecimalPlaces(numberDecimals);
+			if (presenter.mtp() != null){
+				presenter.setMtpDecimalPlaces(numberDecimals);
 			}
 			frame.setVisible(false);
 		});

@@ -2,8 +2,6 @@ package gov.ca.water.jdiagram.swing.toolbars;
 
 import java.awt.Composite;
 import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -13,20 +11,23 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import com.google.common.flogger.FluentLogger;
-import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 import gov.ca.water.jdiagram.core.utils.TimeOps;
+import gov.ca.water.jdiagram.swing.DataPresenter;
 import gov.ca.water.jdiagram.swing.dialog.AddTimeWindowDialog;
+import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
 public class DateCombo
 {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-	private SchematicPanel schematicView;
+	private final SchematicPanel schematicView;
+	private final DataPresenter presenter;
 
 	private JComboBox<String> dateList;
 
-	public DateCombo(SchematicPanel schematicPanel) {
+	public DateCombo(SchematicPanel schematicPanel, DataPresenter presenter) {
 		this.schematicView = schematicPanel;
+		this.presenter = presenter;
 	}
 
 	protected JPanel createControl(JPanel parent) {
@@ -38,30 +39,25 @@ public class DateCombo
 		dateList = new JComboBox<>();
 		container.add(dateList);
 		setDateCombo(10, 1921, 9, 3000);
-		dateList.addActionListener(new ActionListener(){
-
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				schematicView.getBase().getHost().updateSelectedIndex(dateList.getSelectedIndex());
-				if (schematicView.getBase().getHost().getSelectedIndex() > 0){
-					schematicView.getBase().getHost().setSelectedDate((String) dateList.getSelectedItem());
-					if (!schematicView.getBase().getDataSource().isDebugging()) {
-						schematicView.refreshValues(0, true);
-					} else {
-						if (schematicView.getBase().getDataSource().target() != null) {
-							schematicView.refreshValues(1, true);
-						}
+		dateList.addActionListener(e -> {
+			schematicView.getBase().getHost().updateSelectedIndex(dateList.getSelectedIndex());
+			if (schematicView.getBase().getHost().getSelectedIndex() > 0){
+				schematicView.getBase().getHost().setSelectedDate((String) dateList.getSelectedItem());
+				if (!schematicView.getBase().getDataSource().isDebugging()) {
+					schematicView.refreshValues(0, true);
+				} else {
+					if (schematicView.getBase().getDataSource().target() != null) {
+						schematicView.refreshValues(1, true);
 					}
-				} else if (schematicView.getBase().getHost().getSelectedIndex() == 0){
-					schematicView.getBase().getHost().launchDialog(() -> {
-						Composite window = schematicView.getBase().getHost().getShell(dateList);
-						JFrame parentFrame = window instanceof JFrame ? (JFrame) window : null;
-						AddTimeWindowDialog dialog = new AddTimeWindowDialog(parentFrame, schematicView.getBase(), getDateList());
-						dialog.openDialog();
-					});
 				}
+			} else if (schematicView.getBase().getHost().getSelectedIndex() == 0){
+				presenter.launchDialog(() -> {
+					Composite window = presenter.getShell(dateList);
+					JFrame parentFrame = window instanceof JFrame ? (JFrame) window : null;
+					AddTimeWindowDialog dialog = new AddTimeWindowDialog(parentFrame, schematicView.getBase(), getDateList());
+					dialog.openDialog();
+				});
 			}
-
 		});
 		parent.add(container);
 		return container;

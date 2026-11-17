@@ -1,51 +1,18 @@
-package gov.ca.water.jdiagram.core;
+package gov.ca.water.jdiagram.swing;
 
 import java.awt.Component;
 import java.awt.Composite;
 import java.util.List;
-import java.util.Map;
-import java.util.prefs.Preferences;
-
 import javax.swing.JPanel;
+import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
-import hec.hecmath.HecMath;
+import com.mindfusion.diagramming.DiagramView;
+import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
-public interface SchematicHost
+public interface DataPresenter
 {
-	Preferences getPreferences();
-
-	void setPreferences(Preferences preferences);
-
-	List<String> getSchematicTwSelections();
-
-	void clearSchematicTwSelections();
-
-	Map<String, String> getAllSchematicVariableUnitsCFS(int index);
-
-	Map<String, String> getAllSchematicVariableUnitsTAF(int index);
-
-	Map<String, HecMath> getSchematicVariableData(int index);
-
-	Map<Integer, List<Map<String, Double>>> getLongTermAverageDataCFS();
-
-	Map<Integer, List<Map<String, Double>>> getLongTermAverageDataTAF();
-
-	String getTwFile();
-
-	int getSelectedIndex();
-
-	void updateSelectedIndex(int index);
-
-	String getSelectedDate();
-
-	void setSelectedDate(String date);
-
 	void showTimeSeries(List<String> names);
-
-	void reportError(Throwable t);
-
-	void showWarning(String message);
 
 	/**
 	 * Runs the supplied action that opens a specified dialog on the host's UI thread.
@@ -72,14 +39,15 @@ public interface SchematicHost
 
 	void setMtpDecimalPlaces(int numberDecimals);
 
-	/**
-	 *
-	 */
 	void showDssView();
 
 	void showDSSPerspective();
 
-	String diff();
+	void launchFontDialog();
 
-	String cfs();
+	String launchFileDialog();
+
+	void launchViewPart(SchematicOverview overview, DiagramView view, JPanel container);
+
+	JToolBar getToolBar();
 }

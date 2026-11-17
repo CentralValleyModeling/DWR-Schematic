@@ -12,6 +12,8 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.google.common.flogger.FluentLogger;
+import gov.ca.water.jdiagram.core.interfaces.SchematicDataSource;
+import gov.ca.water.jdiagram.core.interfaces.SchematicHost;
 import gov.ca.water.jdiagram.core.utils.TimeOps;
 
 import hec.heclib.dss.CondensedReference;
