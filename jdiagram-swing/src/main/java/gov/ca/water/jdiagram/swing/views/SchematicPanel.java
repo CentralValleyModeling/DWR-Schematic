@@ -74,6 +74,8 @@ public class SchematicPanel extends JComponent
 
 	private JPanel swingContainer;
 
+	private float _zoomFactor = 100;
+
 	protected transient DiagramAdapter listener;
 
 	private SchematicOverview overview;
@@ -136,7 +138,7 @@ public class SchematicPanel extends JComponent
 	 * it.
 	 */
 	public void createPartControl(JPanel parent) {
-  Container contentPane;
+  		Container contentPane;
 		System.setProperty("sun.awt.noerasebackground", "true");
 		swingContainer = new JPanel();
 		Panel panel = new Panel(new BorderLayout()) {
@@ -271,7 +273,7 @@ public class SchematicPanel extends JComponent
 
 
 	private void makeActions() {
-  float _zoomFactor = 100;
+  		_zoomFactor = 100;
 		openSchematicAction = buildAction("Open", openIcon(), e -> {
 			final String file = presenter.launchFileDialog();
 			if (file == null) {
