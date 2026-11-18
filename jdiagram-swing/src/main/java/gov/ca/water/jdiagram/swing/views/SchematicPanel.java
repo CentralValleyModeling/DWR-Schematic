@@ -2,6 +2,7 @@ package gov.ca.water.jdiagram.swing.views;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Composite;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -74,6 +75,8 @@ public class SchematicPanel extends JComponent
 
 	private JPanel swingContainer;
 
+	private Container contentPane;
+
 	private float _zoomFactor = 100;
 
 	protected transient DiagramAdapter listener;
@@ -133,12 +136,19 @@ public class SchematicPanel extends JComponent
 		return base;
 	}
 
+	public DataPresenter getDataPresenter() {
+		return presenter;
+	}
+
+	public Component getContentPane(){
+		return contentPane;
+	}
+
 	/**
 	 * This is a callback that will allow us to create the viewer and initialize
 	 * it.
 	 */
 	public void createPartControl(JPanel parent) {
-  		Container contentPane;
 		System.setProperty("sun.awt.noerasebackground", "true");
 		swingContainer = new JPanel();
 		Panel panel = new Panel(new BorderLayout()) {

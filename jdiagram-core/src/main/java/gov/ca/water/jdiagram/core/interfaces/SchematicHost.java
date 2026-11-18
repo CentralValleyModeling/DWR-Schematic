@@ -4,6 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.prefs.Preferences;
 
+import com.mindfusion.diagramming.Diagram;
+import com.mindfusion.diagramming.DiagramItem;
+
 import hec.hecmath.HecMath;
 
 public interface SchematicHost
@@ -43,4 +46,12 @@ public interface SchematicHost
 	void reportError(Throwable t);
 
 	void showWarning(String message);
+
+	Diagram getDiagram();
+
+	void setDiagram(Diagram diagram);
+
+	List<DiagramItem> getDiagramItems();
+
+	void setDiagramItems(List<DiagramItem> diagramItems);
 }
