@@ -1,68 +1,52 @@
 package gov.ca.water.jdiagram.swing.toolbars;
 
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import java.awt.event.ActionListener;
 import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingConstants;
 
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
-public class SearchText extends JComponent
+/**
+ * Toolbar control with a "Search" button and text field that brings the first matching node into view.
+ */
+public class SearchText extends JPanel
 {
-	SchematicPanel schematicView;
-	private JTextField text;
-	private JButton search;
-	private Font font;
+	private final transient SchematicPanel schematicView;
+	private final JTextField text;
+	private final JButton search;
 
-	public SearchText(SchematicPanel schematicPanelBase) {
-		this.schematicView = schematicPanelBase;
+	public SearchText(SchematicPanel schematicPanel) {
+		super(new GridLayout(1, 2, 0, 0));
+		this.schematicView = schematicPanel;
+
+		search = new JButton("Search");
+		search.setName("searchButton");
+		search.setFont(new Font("Arial", Font.PLAIN, 10));
+
+		text = new JTextField();
+		text.setName("searchField");
+		text.setHorizontalAlignment(SwingConstants.CENTER);
+		text.setColumns(12);
+
+		ActionListener doSearch = e -> schematicView.findInView(text.getText());
+		search.addActionListener(doSearch);
+		text.addActionListener(doSearch);
+
+		add(search);
+		add(text);
+		setMaximumSize(new Dimension(260, 30));
 	}
 
-	protected JFrame createControl(JFrame parent) {
-		JFrame container = new JFrame();
-		GridLayout glContainer = new GridLayout(1, 2);
-		glContainer.setHgap(0);
-		glContainer.setVgap(0);
-		container.setLayout(glContainer);
-		search = new JButton();
-		search.setText("Search");
-		font = new Font("Arial", Font.PLAIN, 10);
-		search.setFont(font);
-		search.addMouseListener(new MouseListener(){
+	public JTextField getTextField() {
+		return text;
+	}
 
-			@Override
-			public void mousePressed(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseClicked(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseEntered(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseExited(MouseEvent e) {
-			}
-
-			@Override
-			public void mouseReleased(MouseEvent e) {
-				String searchText=text.getText();
-				schematicView.findInView(searchText);
-			}
-		});
-		container.add(search);
-		text = new JTextField();
-		text.setText("");
-		text.setHorizontalAlignment(JTextField.CENTER);
-		text.setBounds(0, 0, 140, 15);
-		container.add(text);
-		parent.add(container);
-		return container;
+	public JButton getSearchButton() {
+		return search;
 	}
 }

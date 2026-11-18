@@ -2,14 +2,12 @@ package gov.ca.water.jdiagram.swing.views;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Composite;
 import java.awt.Dialog;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.LineNumberReader;
@@ -137,8 +135,9 @@ public class SchematicEditor extends SchematicPanel {
 		super(base, presenter);
 	}
 
-	public void createPartControl(Composite parent) {
-		super.createPartControl((JPanel) parent);
+	@Override
+	public void createPartControl(JPanel parent) {
+		super.createPartControl(parent);
 
 		getDiagramView().setBehavior(Behavior.Modify);
 		getDiagramView().setAllowInplaceEdit(true);
@@ -170,22 +169,22 @@ public class SchematicEditor extends SchematicPanel {
 
 		shortenPointsMenuItem = new JMenuItem("Delete Intermediate Points");
 		shortenPointsMenuItem.addActionListener(e -> {
-			if (clickedItem != null && clickedItem instanceof DiagramLink) {
-				onShortenPoints((DiagramLink) clickedItem);
+			if (clickedItem instanceof DiagramLink link) {
+				onShortenPoints(link);
 			}
 		});
 
 		changePointsMenuItem = new JMenuItem(
 				"Change Number of Intermediate Points");
 		changePointsMenuItem.addActionListener(e -> {
-			if (clickedItem != null && clickedItem instanceof DiagramLink) {
-				onChangePoints((DiagramLink) clickedItem);
+			if (clickedItem instanceof DiagramLink link) {
+				onChangePoints(link);
 			}
 		});
 
 		editShapeMenuItem = new JMenuItem("Edit Shape");
 		editShapeMenuItem.addActionListener(e -> {
-			if (clickedItem != null && clickedItem instanceof DiagramItem) {
+			if (clickedItem instanceof DiagramItem) {
 				if (clickedItem instanceof DiagramLink) {
 					Pen p = clickedItem.getPen().clone();
 					clickedItem.setPen(p);
@@ -343,20 +342,16 @@ public class SchematicEditor extends SchematicPanel {
 
 		undoAction = buildAction("Undo", icon("undo.png"), e -> {
 			getDiagram().getUndoManager().undo();
-			if (this instanceof Action) {
-				if (getDiagram().getUndoManager().getHistory().getNextUndo() == null) {
-					setEnabled(false);
-				}
+			if (this instanceof Action && getDiagram().getUndoManager().getHistory().getNextUndo() == null) {
+				setEnabled(false);
 			}
 		});
 		undoAction.setEnabled(false);
 
 		redoAction = buildAction("Redo", icon("redo.png"), e -> {
 			getDiagram().getUndoManager().redo();
-			if (this instanceof Action) {
-				if (getDiagram().getUndoManager().getHistory().getNextRedo() == null) {
-					setEnabled(false);
-				}
+			if (this instanceof Action && getDiagram().getUndoManager().getHistory().getNextRedo() == null) {
+				setEnabled(false);
 			}
 		});
 		redoAction.setEnabled(false);
@@ -413,7 +408,7 @@ public class SchematicEditor extends SchematicPanel {
 		compositeCmd.execute();
 	}
 
-	private Point2D lastMouseClickedPosition;
+	private transient Point2D lastMouseClickedPosition;
 	private DiagramItem clickedItem;
 
 	public void onCopy() {
@@ -554,9 +549,7 @@ public class SchematicEditor extends SchematicPanel {
 		} else {
 			try {
 				diagramView.pasteFromClipboard(delX, delY, false);
-			} catch (IOException e) {
-				getBase().getHost().reportError(e);
-			} catch (XmlException e) {
+			} catch (IOException | XmlException e) {
 				getBase().getHost().reportError(e);
 			}
 		}
@@ -702,21 +695,18 @@ public class SchematicEditor extends SchematicPanel {
 		}
 	}
 
-	private final boolean spaceNodesEvenly = false;
+	private static final boolean spaceNodesEvenly = false;
 
 	public void alignSelectedNodes(final Orientation orientation) {
 		Diagram diagram = getDiagram();
 		DiagramNodeList nodes = diagram.getSelection().getNodes();
 		List<DiagramNode> sortedNodes = new ArrayList<>();
 		sortedNodes.addAll(nodes);
-		Collections.sort(sortedNodes, (arg0, arg1) -> {
-			if (orientation == Orientation.Horizontal) {
-				return (int) Math.signum(arg0.getBounds().x - arg1.getBounds().x);
-			} else if (orientation == Orientation.Vertical) {
-				return (int) Math.signum(arg0.getBounds().y - arg1.getBounds().y);
-			} else {
-				return 0;
-			}
+		Collections.sort(sortedNodes, (arg0, arg1) -> switch(orientation)
+		{
+			case Orientation.Horizontal -> (int) Math.signum(arg0.getBounds().x - arg1.getBounds().x);
+			case Orientation.Vertical -> (int) Math.signum(arg0.getBounds().y - arg1.getBounds().y);
+			default -> 0;
 		});
 		if (nodes.isEmpty()) {
 			return;
@@ -830,10 +820,10 @@ public class SchematicEditor extends SchematicPanel {
 				}
 
 				String attributeName = mapper.getAttributeName(pen, brush, shape, customdraw);
-				wr.println(String.format("%-45s|%s|%s|%3.1f|%s|%s|%s|%s", id, mapper
+				wr.printf("%-45s|%s|%s|%3.1f|%s|%s|%s|%s%n", id, mapper
 						.formatColor(pen.getColor()), mapper.formatStyle(pen
 						.getDashStyle()), pen.getWidth(), mapper
-						.formatColor(fillColor), mapper.formatShape(shape), mapper.formatCustomDraw(customdraw), attributeName));
+						.formatColor(fillColor), mapper.formatShape(shape), mapper.formatCustomDraw(customdraw), attributeName);
 			}
 		}
 		wr.close();

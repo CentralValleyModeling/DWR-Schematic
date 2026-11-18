@@ -52,7 +52,7 @@ public class SchematicPanelBase
 	public Hashtable<String, String>[] retrieveUndebug(String date, Hashtable<String, Object> names) {
 		List<String> tws = host.getSchematicTwSelections();
 		for (int i = 0; i < tws.size() - 1; i++) {
-			if (date.equals(tws.get(i + 1))) {
+			if (date != null && date.equals(tws.get(i + 1))) {
 				if (dataSource.units().equals(dataSource.cfs())) {
 					if (dataSource.months().size() < 12) {
 						return retrieveLongTermAverageSelectedMonths(date, names, true);
@@ -656,7 +656,7 @@ public class SchematicPanelBase
 			}
 			tsc.values = nvalues;
 		} catch (Exception e) {
-			System.out.println("Exception convertAnnualTAFData: " + e);
+			logger.atFine().withCause(e).log("Error encountered in convertAnnualTAFData method");
 		}
 		return tsc;
 	}

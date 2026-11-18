@@ -1,7 +1,8 @@
 package gov.ca.water.jdiagram.swing.toolbars;
 
-import java.awt.Composite;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,9 +37,18 @@ public class DateCombo
 		glContainer.setHgap(0);
 		glContainer.setVgap(0);
 		container.setLayout(glContainer);
+		container.add(getDateList());
+		parent.add(container);
+		return container;
+	}
+
+	private JComboBox<String> buildDateList() {
 		dateList = new JComboBox<>();
-		container.add(dateList);
+		dateList.setName("dateList");
+		dateList.setMaximumSize(new Dimension(160, 30));
 		setDateCombo(10, 1921, 9, 3000);
+		// Register after populating: JComboBox fires ActionEvents when the first item is added,
+		// which would otherwise pop the "Add time window" dialog on startup.
 		dateList.addActionListener(e -> {
 			schematicView.getBase().getHost().updateSelectedIndex(dateList.getSelectedIndex());
 			if (schematicView.getBase().getHost().getSelectedIndex() > 0){
@@ -52,19 +62,18 @@ public class DateCombo
 				}
 			} else if (schematicView.getBase().getHost().getSelectedIndex() == 0){
 				presenter.launchDialog(() -> {
-					Composite window = presenter.getShell(dateList);
+					Window window = presenter.getShell(dateList);
 					JFrame parentFrame = window instanceof JFrame ? (JFrame) window : null;
 					AddTimeWindowDialog dialog = new AddTimeWindowDialog(parentFrame, schematicView.getBase(), getDateList());
 					dialog.openDialog();
 				});
 			}
 		});
-		parent.add(container);
-		return container;
+		return dateList;
 	}
 
 	public void setDateCombo(int startMonth, int startYear, int endMonth, int endYear) {
-		dateList.removeAll();
+		dateList.removeAllItems();
 		procTWFile();
 		for (int i = 0; i < schematicView.getBase().getHost().getSchematicTwSelections().size(); i++){
 			dateList.addItem(schematicView.getBase().getHost().getSchematicTwSelections().get(i));
@@ -83,7 +92,13 @@ public class DateCombo
 		}
 	}
 
+	/**
+	 * @return the date selector, created and populated on first access
+	 */
 	public JComboBox<String> getDateList(){
+		if (dateList == null) {
+			buildDateList();
+		}
 		return dateList;
 	}
 

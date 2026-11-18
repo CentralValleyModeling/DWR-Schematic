@@ -3,13 +3,14 @@ package gov.ca.water.jdiagram.swing.views;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Composite;
 import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Frame;
 import java.awt.Panel;
+import java.awt.Window;
 import java.awt.geom.Rectangle2D;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
@@ -41,6 +42,7 @@ import com.mindfusion.diagramming.InplaceEditable;
 import com.mindfusion.diagramming.LinkEvent;
 import com.mindfusion.diagramming.NodeEvent;
 import com.mindfusion.diagramming.ShapeNode;
+import com.mindfusion.diagramming.XmlException;
 import com.mindfusion.diagramming.export.SvgExporter;
 import com.mindfusion.drawing.Align;
 import com.mindfusion.drawing.TextFormat;
@@ -88,6 +90,8 @@ public class SchematicPanel extends JComponent
 	private final transient DiagramSelectionProvider selectionProvider = new DiagramSelectionProvider();
 
 	protected transient DateCombo dateCombo;
+
+	private SearchText searchText;
 
 	private transient Action zoomInAction;
 
@@ -144,13 +148,25 @@ public class SchematicPanel extends JComponent
 		return contentPane;
 	}
 
+	public SchematicOverview getOverview() {
+		return overview;
+	}
+
+	public DateCombo getDateCombo() {
+		return dateCombo;
+	}
+
+	public SearchText getSearchText() {
+		return searchText;
+	}
+
 	/**
 	 * This is a callback that will allow us to create the viewer and initialize
 	 * it.
 	 */
 	public void createPartControl(JPanel parent) {
 		System.setProperty("sun.awt.noerasebackground", "true");
-		swingContainer = new JPanel();
+		swingContainer = new JPanel(new BorderLayout());
 		Panel panel = new Panel(new BorderLayout()) {
 			@Override
 			public void update(java.awt.Graphics g) {
@@ -158,9 +174,9 @@ public class SchematicPanel extends JComponent
 				paint(g);
 			}
 		};
-		swingContainer.add(panel);
+		swingContainer.add(panel, BorderLayout.CENTER);
 		JRootPane root = new JRootPane();
-		panel.add(root);
+		panel.add(root, BorderLayout.CENTER);
 		parent.add(swingContainer);
 		contentPane = root.getContentPane();
 		diagram = new Diagram();
@@ -176,7 +192,7 @@ public class SchematicPanel extends JComponent
 				public void run() {
 				}};
 
-			private final int delay = 250;
+			private static final int delay = 250;
 
 
 			@Override
@@ -251,6 +267,8 @@ public class SchematicPanel extends JComponent
 		diagram.addDiagramListener(listener);
 		contentPane.add(new JScrollPane(diagramView));
 
+		overview = new SchematicOverview();
+		overview.setDiagramView(diagramView);
 		presenter.launchViewPart(overview, diagramView, swingContainer);
 
 		makeActions();
@@ -262,7 +280,6 @@ public class SchematicPanel extends JComponent
 	}
 
 	private void fillLocalToolBar(JToolBar manager) {
-  SearchText searchText;
 		manager.add(openSchematicAction);
 		manager.add(saveAsSchematicAction);
 		manager.add(zoomInAction);
@@ -365,7 +382,8 @@ public class SchematicPanel extends JComponent
 
 		fontAction = buildAction("Font", icon("font.png"), e -> {
 			presenter.launchDialog(() -> {
-				Frame frame = (Frame) presenter.getShell(this);
+				Window window = presenter.getShell(diagramView);
+				Frame frame = window instanceof Frame f ? f : null;
 				Font oldFont = getDiagram().getFont();
 				presenter.launchFontDialog();
 				FontChooser chooser = new FontChooser(frame, null, false, oldFont);
@@ -386,8 +404,9 @@ public class SchematicPanel extends JComponent
 
 		decimalAction = buildAction("Decimal", icon("decimal.png"), e -> {
 			presenter.launchDialog(() -> {
-				Composite parent = presenter.getShell(this);
-				DecimalDialog decimalDialog = new DecimalDialog((JFrame) parent, this, presenter);
+				Window window = presenter.getShell(diagramView);
+				JFrame parent = window instanceof JFrame f ? f : null;
+				DecimalDialog decimalDialog = new DecimalDialog(parent, this, presenter);
 				decimalDialog.openDialog();
 			});
 		});
@@ -501,11 +520,11 @@ public class SchematicPanel extends JComponent
 		}
 	}
 
-	public void updateValues(int index, String date, Rectangle2D.Float visibleRect){
+	public void updateValues(int index, String date, Rectangle2D.Float visibleRect) {
 		Hashtable<String, String>[] values = null;
 		Hashtable<String, Object> visibleNodes = getVisibleNodes(visibleRect);
 
-		final Hashtable<String, Object> names = new Hashtable<String, Object>();
+		final Hashtable<String, Object> names = new Hashtable<>();
 		for (String v : visibleNodes.keySet()) {
 			names.put(v, v);
 		}
@@ -681,7 +700,8 @@ public class SchematicPanel extends JComponent
 		}
 	}
 
-	public void save(final String filename) throws Exception {
+	public void save(final String filename) throws IOException, XmlException
+	{
 		if (filename == null)
 			return;
 		Cursor previousCursor = diagramView.getCursor();
@@ -691,8 +711,8 @@ public class SchematicPanel extends JComponent
 				diagram.saveToXml(filename);
 			} else if (filename.endsWith(".pdf")) {
 				presenter.launchDialog(() -> {
-					Composite window = presenter.getShell(diagramView);
-					JFrame frame = (JFrame) window;
+					Window window = presenter.getShell(diagramView);
+					JFrame frame = window instanceof JFrame f ? f : null;
 					PDFOptionDialog dialog= new PDFOptionDialog(frame, filename, diagram, base.getDataSource());
 					dialog.openDialog();
 				});

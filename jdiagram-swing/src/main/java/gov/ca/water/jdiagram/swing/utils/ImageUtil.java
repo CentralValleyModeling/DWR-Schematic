@@ -12,9 +12,12 @@ public class ImageUtil {
 
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-	/** Returns an ImageIcon, or null if the path was invalid. */
+	/** Base package for relative image paths such as {@code "images/copy.png"}. */
+	private static final String RESOURCE_ROOT = "/gov/ca/water/jdiagram/";
+
+	/** Returns an ImageIcon, or an empty icon if the path was invalid. */
 	public static ImageIcon createImageIcon(String path) {
-		URL imgURL = ImageUtil.class.getResource(path);
+		URL imgURL = ImageUtil.class.getResource(path.startsWith("/") ? path : RESOURCE_ROOT + path);
 		if (imgURL != null) {
 			return new ImageIcon(imgURL);
 		} else {

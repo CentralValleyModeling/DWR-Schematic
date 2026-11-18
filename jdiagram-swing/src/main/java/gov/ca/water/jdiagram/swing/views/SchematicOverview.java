@@ -1,6 +1,6 @@
 package gov.ca.water.jdiagram.swing.views;
 
-import java.awt.Composite;
+import java.awt.BorderLayout;
 import javax.swing.JPanel;
 
 import com.mindfusion.diagramming.DiagramView;
@@ -13,21 +13,25 @@ public class SchematicOverview extends JPanel
 	 */
 	public static final String ID = SchematicOverview.class.getCanonicalName();
 
-	private transient Composite swingContainer;
-
-	private Overview overview;
+	private final transient Overview overview;
 
 	/**
 	 * The constructor.
 	 */
 	public SchematicOverview() {
+		super(new BorderLayout());
+		overview = new Overview();
+		overview.setFitAll(true);
+		add(overview, BorderLayout.CENTER);
 	}
 
+	public Overview getOverview() {
+		return overview;
+	}
 
 	public void setDiagramView(DiagramView diagramView) {
 		overview.setDiagramView(diagramView);
-		overview.repaint();
-		overview.setBounds(diagramView.getBounds());
 		overview.setFitAll(true);
+		overview.repaint();
 	}
 }
