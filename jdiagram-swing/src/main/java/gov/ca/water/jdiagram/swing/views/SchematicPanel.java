@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Vector;
@@ -516,15 +517,17 @@ public class SchematicPanel extends JComponent
 			lastVisibleRect = visibleRect;
 
 			final String selDate = base.getHost().getSelectedDate();
-			new Thread(() -> updateValues(index, selDate, visibleRect)).start();
+			if (selDate != null) {
+				new Thread(() -> updateValues(index, selDate, visibleRect)).start();
+			}
 		}
 	}
 
 	public void updateValues(int index, String date, Rectangle2D.Float visibleRect) {
-		Hashtable<String, String>[] values = null;
-		Hashtable<String, Object> visibleNodes = getVisibleNodes(visibleRect);
+		Map<String, String>[] values = null;
+		Map<String, Object> visibleNodes = getVisibleNodes(visibleRect);
 
-		final Hashtable<String, Object> names = new Hashtable<>();
+		final Map<String, Object> names = new Hashtable<>();
 		for (String v : visibleNodes.keySet()) {
 			names.put(v, v);
 		}
@@ -536,12 +539,12 @@ public class SchematicPanel extends JComponent
 		setValues(index, visibleNodes, values);
 	}
 
-	public void setValues(int index, Hashtable<String, Object> visibleNodes, Hashtable<String, String>[] values) {
+	public void setValues(int index, Map<String, Object> visibleNodes, Map<String, String>[] values) {
 		try {
 			diagramView.suspendRepaint();
 			synchronized (diagramView) {
 				for (int studyId = 0; studyId < values.length; studyId++) {
-					Hashtable<String, String> valuesInStudy = values[studyId];
+					Map<String, String> valuesInStudy = values[studyId];
 					for (String name : valuesInStudy.keySet()) {
 						Object object = visibleNodes.get(name.toUpperCase());
 						if (object == null) {
@@ -589,8 +592,8 @@ public class SchematicPanel extends JComponent
 		}
 	}
 
-	public Hashtable<String, Object> getVisibleNodes(Rectangle2D.Float visibleRect) {
-		Hashtable<String, Object> variables = new Hashtable<>();
+	public Map<String, Object> getVisibleNodes(Rectangle2D.Float visibleRect) {
+		Map<String, Object> variables = new Hashtable<>();
 		Iterable<ShapeNode> items = diagram.items(ShapeNode.class);
 		for (ShapeNode item : items) {
 			if (!item.getBounds().intersects(visibleRect))
@@ -688,7 +691,7 @@ public class SchematicPanel extends JComponent
 		if (visibleRect == null) {
 			return;
 		}
-		Hashtable<String, Object> visibleNodes = getVisibleNodes(visibleRect);
+		Map<String, Object> visibleNodes = getVisibleNodes(visibleRect);
 		for (Object o : visibleNodes.values()) {
 			if (o instanceof ShapeNode) {
 				ShapeNode shapeNode = (ShapeNode) o;
@@ -729,7 +732,7 @@ public class SchematicPanel extends JComponent
 
 	public void collectAllSchematicVariables() {
 		if (this instanceof SchematicView){
-			Hashtable<String, Object> allNodes = getVisibleNodes(diagram.getBounds());
+			Map<String, Object> allNodes = getVisibleNodes(diagram.getBounds());
 
 			base.getHost().setAllSchematicVariableNames(new ArrayList<>());
 			for (String v : allNodes.keySet()) {

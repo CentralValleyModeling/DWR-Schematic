@@ -2,7 +2,6 @@ package gov.ca.water.jdiagram.core;
 
 import java.time.Month;
 import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -49,7 +48,7 @@ public class SchematicPanelBase
 		return dataSource;
 	}
 
-	public Hashtable<String, String>[] retrieveUndebug(String date, Hashtable<String, Object> names) {
+	public Map<String, String>[] retrieveUndebug(String date, Map<String, Object> names) {
 		List<String> tws = host.getSchematicTwSelections();
 		for (int i = 0; i < tws.size() - 1; i++) {
 			if (date != null && date.equals(tws.get(i + 1))) {
@@ -89,16 +88,16 @@ public class SchematicPanelBase
 					baseIndex = k;
 				}
 
-				Enumeration<String> variableEnum = names.keys();
-				while (variableEnum.hasMoreElements()) {
-					String name = variableEnum.nextElement().toLowerCase();
+				Set<String> variableEnum = names.keySet();
+				for (String name : variableEnum) {
+					name = name.toLowerCase();
 					boolean isStorage = false;
 					String value = "";
 					if (host.getSchematicVariableData(k).containsKey(name)) {
 						try {
 							HecMath dataSet = host.getSchematicVariableData(k).get(name);
 							if (dataSource.storageNames().contains(name)) {
-								isStorage=true;
+								isStorage = true;
 							}
 							TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
 							if (tsc != null) {
@@ -118,22 +117,20 @@ public class SchematicPanelBase
 									value = "N/A";
 								} else {
 									Double value_temp = tsc.values[valueIndex];
-									if (Math.abs(value_temp)>100000000) {//empty value
+									if (Math.abs(value_temp) > 100000000) {//empty value
 										value = "N/A";
 									} else {
-										value = tsc.values[valueIndex] + " "
-												+ tsc.units;
+										value = tsc.values[valueIndex] + " " + tsc.units;
 									}
 								}
 
 								if (dataSource.mode().equals(dataSource.diff())) {
 									if (k > baseIndex) {
 										if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
-											results[k].put(name,"N/A");
+											results[k].put(name, "N/A");
 											continue;
 										}
-										String[] baseFields = results[baseIndex].get(name)
-												.split("\\s");
+										String[] baseFields = results[baseIndex].get(name).split("\\s");
 										String[] altFields = value.split("\\s");
 										try {
 											double baseVal = Double.parseDouble(baseFields[0]);
@@ -164,8 +161,6 @@ public class SchematicPanelBase
 	}
 
 	public void calculateLongTermAverage(int pi, String date, boolean isCFS) {
-
-		Hashtable<String, Double> _longTermTafToCfsConversionFactors = new Hashtable<>();
 
 		List<Map<String, Double>> termAverage= new ArrayList<>();
 		if (isCFS) {
@@ -343,9 +338,9 @@ public class SchematicPanelBase
 		return termAverage;
 	}
 
-	public Hashtable<String, String>[] retrieveLongTermAverage(int index, Hashtable<String, Object> names, boolean isCFS) {
+	public Map<String, String>[] retrieveLongTermAverage(int index, Map<String, Object> names, boolean isCFS) {
 
-		Hashtable<String, String>[] results = new Hashtable[4];
+		Map<String, String>[] results = new Hashtable[4];
 
 		for (int i = 0; i < 4; ++i) {
 			results[i] = new Hashtable<>();
@@ -365,9 +360,9 @@ public class SchematicPanelBase
 				if (baseIndex > k){
 					baseIndex = k;
 				}
-				Enumeration<String> variableEnum = names.keys();
-				while (variableEnum.hasMoreElements()) {
-					String name = variableEnum.nextElement().toLowerCase();
+				Set<String> variableEnum = names.keySet();
+				for (String name : variableEnum) {
+					name = name.toLowerCase();
 					String value = "";
 					Map<String, Double> altAverage = termAverage.get(k);
 					if (altAverage.containsKey(name)) {
@@ -389,7 +384,7 @@ public class SchematicPanelBase
 						if (dataSource.mode().equals(dataSource.diff())) {
 							if (k > baseIndex) {
 								if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
-									results[k].put(name,"N/A");
+									results[k].put(name, "N/A");
 									continue;
 								}
 								String[] baseFields = results[baseIndex].get(name)
@@ -422,9 +417,9 @@ public class SchematicPanelBase
 		return results;
 	}
 
-	public Hashtable<String, String>[] retrieveLongTermAverageSelectedMonths(String date, Hashtable<String, Object> names, boolean isCFS){
+	public Map<String, String>[] retrieveLongTermAverageSelectedMonths(String date, Map<String, Object> names, boolean isCFS) {
 
-		Hashtable<String, String>[] results = new Hashtable[4];
+		Map<String, String>[] results = new Hashtable[4];
 
 		for (int i = 0; i < 4; ++i) {
 			results[i] = new Hashtable<>();
@@ -440,9 +435,9 @@ public class SchematicPanelBase
 					baseIndex = k;
 				}
 				Map<String, Double> altAverage = termAverage.get(k);
-				Enumeration<String> variableEnum = names.keys();
-				while (variableEnum.hasMoreElements()) {
-					String name = variableEnum.nextElement().toLowerCase();
+				Set<String> variableEnum = names.keySet();
+				for (String name : variableEnum) {
+					name = name.toLowerCase();
 					String value = "";
 					if (altAverage.containsKey(name)) {
 						double data = altAverage.get(name);
@@ -463,7 +458,7 @@ public class SchematicPanelBase
 						if (dataSource.mode().equals(dataSource.diff())) {
 							if (k > baseIndex) {
 								if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
-									results[k].put(name,"N/A");
+									results[k].put(name, "N/A");
 									continue;
 								}
 								String[] baseFields = results[baseIndex].get(name)
@@ -479,7 +474,7 @@ public class SchematicPanelBase
 									results[k].put(name, (altVal - baseVal) + " " + baseFields[1]);
 								} catch (NumberFormatException nfe) {
 									logger.atFiner().withCause(nfe).log("Number format exception encountered");
-									results[k].put(name,"N/A");
+									results[k].put(name, "N/A");
 								}
 							} else {
 								results[k].put(name, value);
@@ -497,8 +492,8 @@ public class SchematicPanelBase
 		return results;
 	}
 
-	public Hashtable<String, String>[] retrieveDebug(String date, Hashtable<String, Object> names) {
-		Hashtable<String, String>[] results = new Hashtable[5];
+	public Map<String, String>[] retrieveDebug(String date, Map<String, Object> names) {
+		Map<String, String>[] results = new Hashtable[5];
 
 		for (int i = 0; i < 5; ++i) {
 			results[i] = new Hashtable<>();
@@ -506,18 +501,18 @@ public class SchematicPanelBase
 
 		baseIndex = 0;
 
-		Enumeration<String> variableEnum = names.keys();
+		Set<String> variableEnum = names.keySet();
 		for (int k = 0; k < 4; k++) {
 			if (dataSource.getSelectedStudy(k)){
 
-				while (variableEnum.hasMoreElements()) {
-					String name = variableEnum.nextElement().toLowerCase();
+				for (String name : variableEnum) {
+					name = name.toLowerCase();
 					boolean isStorage = false;
 					String value = "";
 					if (host.getSchematicVariableData(k).containsKey(name)){
 						try {
 							HecMath dataSet = host.getSchematicVariableData(k).get(name);
-							if (dataSet !=null) {
+							if (dataSet != null) {
 								if (dataSource.storageNames().contains(name)) {
 									isStorage = true;
 								}
@@ -537,23 +532,21 @@ public class SchematicPanelBase
 								if (valueIndex < 0 || valueIndex > tsc.values.length - 1) {
 									value = "N/A";
 								} else {
-									Double value_temp=tsc.values[valueIndex];
+									Double value_temp = tsc.values[valueIndex];
 									if (Math.abs(value_temp) > 100000000) {//empty value
 										value = "N/A";
 									} else {
-										value = tsc.values[valueIndex] + " "
-												+ tsc.units;
+										value = tsc.values[valueIndex] + " " + tsc.units;
 									}
 								}
 
 								if (dataSource.mode().equals(dataSource.diff())) {
 									if (k > baseIndex) {
 										if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
-											results[k].put(name,"N/A");
+											results[k].put(name, "N/A");
 											continue;
 										}
-										String[] baseFields = results[baseIndex].get(name)
-												.split("\\s");
+										String[] baseFields = results[baseIndex].get(name).split("\\s");
 										String[] altFields = value.split("\\s");
 										try {
 											double baseVal = Double.parseDouble(baseFields[0]);
@@ -587,7 +580,6 @@ public class SchematicPanelBase
 
 		if ((dataSource.units().equals("TAF") || force || isStorage)
 				&& dataSet.units.equals("CFS")) {
-			// CB dataSet = adjustMonthlyData(dataSet, 1.9834631 / 1000.);
 			dataSet = adjustMonthlyData(dataSet, true); // CB added constant IV FACTOR
 			// so do not need to pass a
 			// factor
@@ -652,7 +644,7 @@ public class SchematicPanelBase
 			for (int i = 0; i < times.length; i++) {
 				ht.set(times[i]);
 				ht.add(-1);
-				nvalues[i] = tsc.values[i] *12;
+				nvalues[i] = tsc.values[i] * 12;
 			}
 			tsc.values = nvalues;
 		} catch (Exception e) {
@@ -661,8 +653,8 @@ public class SchematicPanelBase
 		return tsc;
 	}
 
-	public static HashMap<String, String> generatePathnameMap(HecDss file){
-		HashMap<String, String> pathnameMap=new HashMap<> ();
+	public static Map<String, String> generatePathnameMap(HecDss file){
+		Map<String, String> pathnameMap = new HashMap<> ();
 		Vector<CondensedReference> v = TimeOps.getCondensedReferences(file);
 		for (int i = 0; i < v.size(); i++){
 			CondensedReference cr = v.get(i);
@@ -688,19 +680,19 @@ public class SchematicPanelBase
 	}
 
 	public String getToolTip(int index, int studyId, boolean isDiff) {
-		if (index==0){
-			if (studyId == baseIndex){
-				return "Alt "+studyId;
-			}else if (studyId>baseIndex){
-				if (isDiff){
-					return "Alt "+studyId+" - " +"Alt "+baseIndex;
-				}else{
-					return "Alt "+studyId;
+		if (index == 0) {
+			if (studyId == baseIndex) {
+				return "Alt " + studyId;
+			} else if (studyId > baseIndex) {
+				if (isDiff) {
+					return "Alt " + studyId + " - Alt " + baseIndex;
+				} else {
+					return "Alt " + studyId;
 				}
-			}else{
+			} else {
 				return "";
 			}
-		}else{
+		} else {
 			switch (studyId) {
 				case 0:
 					return "Debug";
