@@ -121,7 +121,7 @@ class SchematicViewUiTest
 		runOnEdt(() -> button(actionName).doClick());
 	}
 
-	// ---------------------------------------------------------------- startup / layout
+	// startup / layout
 
 	@Test
 	void toolbarContainsViewerActions() throws Exception {
@@ -149,7 +149,7 @@ class SchematicViewUiTest
 		}
 	}
 
-	// ---------------------------------------------------------------- date selection / values
+	// date selection / values
 
 	@Test
 	void dateComboListsTimeWindowsThenMonthsWithoutOpeningDialog() throws Exception {
@@ -223,7 +223,7 @@ class SchematicViewUiTest
 		assertEquals(FIRST_MONTH, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
 	}
 
-	// ---------------------------------------------------------------- zoom / view tools
+	// zoom / view tools
 
 	@Test
 	void zoomInAndOutChangeZoomFactor() throws Exception {
@@ -280,7 +280,7 @@ class SchematicViewUiTest
 		assertEquals(1, harness.getPresenter().countEvents("launchDialog"));
 	}
 
-	// ---------------------------------------------------------------- search / selection
+	// search / selection
 
 	@Test
 	void searchFindsNodesCaseInsensitively() throws Exception {
@@ -306,7 +306,7 @@ class SchematicViewUiTest
 		assertTrue(outgoing.contains("D_BANKS") && outgoing.contains("D_JONES"), outgoing);
 	}
 
-	// ---------------------------------------------------------------- open / save
+	// open / save
 
 	@Test
 	void saveAsXmlThenOpenRoundTrips() throws Exception {

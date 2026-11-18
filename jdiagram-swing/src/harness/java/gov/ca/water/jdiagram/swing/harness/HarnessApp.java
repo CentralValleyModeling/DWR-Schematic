@@ -57,7 +57,7 @@ public final class HarnessApp
 				frame.setVisible(true);
 			} catch (Exception e) {
 				logger.atSevere().withCause(e).log("Harness failed to start");
-				JOptionPane.showMessageDialog(null, "Harness failed to start:\n" + t, "jdiagram harness",
+				JOptionPane.showMessageDialog(null, "Harness failed to start:\n" + e, "jdiagram harness",
 						JOptionPane.ERROR_MESSAGE);
 				System.exit(1);
 			}
