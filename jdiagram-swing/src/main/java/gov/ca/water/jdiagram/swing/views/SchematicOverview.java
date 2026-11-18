@@ -8,9 +8,21 @@ import com.mindfusion.diagramming.Overview;
 
 public class SchematicOverview extends JPanel
 {
+	/**
+	 * The ID of the view as specified by the extension.
+	 */
+	public static final String ID = SchematicOverview.class.getCanonicalName();
+
 	private transient Composite swingContainer;
 
 	private Overview overview;
+
+	/**
+	 * The constructor.
+	 */
+	public SchematicOverview() {
+	}
+
 
 	public void setDiagramView(DiagramView diagramView) {
 		overview.setDiagramView(diagramView);
