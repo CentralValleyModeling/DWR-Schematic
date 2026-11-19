@@ -24,15 +24,17 @@ public final class DecimalDialog extends JDialog
 		setTitle("Set Decimal Places");
 	}
 
+	/** Shows this dialog, modal to its owner. */
 	public void openDialog(){
-		JFrame frame = new JFrame(getTitle());
-		createContents(frame);
-		frame.setSize(325, 120);
-		frame.setLocation(450, 300);
-		frame.setVisible(true);
+		setModal(true);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		createContents(this);
+		setSize(325, 120);
+		setLocationRelativeTo(getOwner());
+		setVisible(true);
 	}
 
-	protected void createContents(final JFrame frame) {
+	protected void createContents(final JDialog frame) {
 		GridLayout layout = new GridLayout();
 		layout.setColumns(14);
 		layout.setVgap(20);
@@ -65,15 +67,13 @@ public final class DecimalDialog extends JDialog
 			if (presenter.mtp() != null){
 				presenter.setMtpDecimalPlaces(numberDecimals);
 			}
-			frame.setVisible(false);
+			frame.dispose();
 		});
 		frame.add(ok);
 
 		JButton cancel = new JButton();
 		cancel.setText("Cancel");
-		cancel.addActionListener(e -> {
-				frame.setVisible(false);
-		});
+		cancel.addActionListener(e -> frame.dispose());
 		frame.add(cancel);
 
 		frame.pack();

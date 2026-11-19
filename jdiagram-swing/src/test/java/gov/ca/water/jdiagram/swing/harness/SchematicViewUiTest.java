@@ -1,5 +1,7 @@
 package gov.ca.water.jdiagram.swing.harness;
 
+import java.awt.Color;
+import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.GraphicsEnvironment;
 import java.awt.Window;
@@ -10,10 +12,13 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.prefs.Preferences;
 import javax.swing.AbstractButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JTextField;
 import javax.swing.JToolBar;
 
 import com.mindfusion.diagramming.Behavior;
@@ -28,7 +33,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.assertNoUncaught;
+import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.awaitValueRefreshes;
+import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.findAll;
 import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.flushEdt;
+import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.showingDialog;
+import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.valueNode;
 import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.format;
 import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.node;
 import static gov.ca.water.jdiagram.swing.harness.UiTestSupport.onEdt;
@@ -77,6 +86,20 @@ class SchematicViewUiTest
 		});
 		waitUntil("harness window showing", () -> harness.isShowing() && harness.getSchematic().getDiagramView().isShowing());
 		flushEdt();
+		// Values are only written to visible nodes; make sure the whole sample is in view before any test runs
+		runOnEdt(harness::fitDiagramToView);
+		flushEdt();
+		Set<String> visible = onEdt(harness::visibleNodeNames);
+		assertTrue(visible.containsAll(List.of("S_SHSTA", "C_SAC041", "D_BANKS", "D_JONES")),
+				() -> "Sample nodes outside the visible area after fit; visible = " + visible);
+	}
+
+	/** Waits for the value label on {@code node} for {@code studyId}; on timeout reports what was shown. */
+	void waitForValue(ShapeNode node, int studyId, String expected) throws Exception {
+		waitUntil("value " + expected + " on " + node.getTextToEdit() + " (study " + studyId + ")",
+				() -> valueText(node, studyId).filter(expected::equals).isPresent(),
+				() -> "shown = " + valueText(node, studyId).orElse("<no label>") + ", visible nodes = "
+						+ harness.visibleNodeNames());
 	}
 
 	boolean editor() {
@@ -86,7 +109,9 @@ class SchematicViewUiTest
 	@AfterEach
 	void tearDown() throws Exception {
 		if (harness != null) {
-			// Dispose every window, including ownerless dialogs the library may have opened
+			// Let background value refreshes finish before the preference node they read is removed
+			awaitValueRefreshes();
+			// Dispose every window, including any dialogs the library opened
 			runOnEdt(() -> {
 				for (Window window : Window.getWindows()) {
 					window.dispose();
@@ -132,6 +157,17 @@ class SchematicViewUiTest
 	}
 
 	@Test
+	void schematicContainsNoHeavyweightComponents() throws Exception {
+		// A heavyweight AWT component under the diagram leaves grey boxes where lightweight popups (the date
+		// combo list, editor context menus) were drawn over it
+		List<String> heavyweight = onEdt(() -> findAll(harness.getContentPane(), java.awt.Component.class).stream()
+				.filter(c -> !c.isLightweight())
+				.map(c -> c.getClass().getName())
+				.toList());
+		assertTrue(heavyweight.isEmpty(), () -> "heavyweight components in the schematic: " + heavyweight);
+	}
+
+	@Test
 	void overviewIsCreatedAndHandedToPresenter() {
 		assertNotNull(harness.getPresenter().getOverview(), "SchematicPanel should pass a non-null overview to launchViewPart");
 		assertSame(schematic().getOverview(), harness.getPresenter().getOverview());
@@ -170,12 +206,32 @@ class SchematicViewUiTest
 		ShapeNode sac = onEdt(() -> node(schematic().getDiagram(), "C_SAC041"));
 		String alt0 = format(SampleData.expectedValue("c_sac041", 0, 0), 0, "CFS");
 		String alt1 = format(SampleData.expectedValue("c_sac041", 1, 0), 0, "CFS");
-		waitUntil("alt 0 value " + alt0 + " on C_SAC041", () -> valueText(sac, 0).filter(alt0::equals).isPresent());
-		waitUntil("alt 1 value " + alt1 + " on C_SAC041", () -> valueText(sac, 1).filter(alt1::equals).isPresent());
+		waitForValue(sac, 0, alt0);
+		waitForValue(sac, 1, alt1);
 
 		ShapeNode shasta = onEdt(() -> node(schematic().getDiagram(), "S_SHSTA"));
 		String storage = format(SampleData.expectedValue("s_shsta", 0, 0), 0, "TAF");
-		waitUntil("storage value " + storage + " on S_SHSTA", () -> valueText(shasta, 0).filter(storage::equals).isPresent());
+		waitForValue(shasta, 0, storage);
+	}
+
+	@Test
+	void deselectingStudyClearsItsValues() throws Exception {
+		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
+		ShapeNode sac = onEdt(() -> node(schematic().getDiagram(), "C_SAC041"));
+		String alt0 = format(SampleData.expectedValue("c_sac041", 0, 0), 0, "CFS");
+		waitForValue(sac, 0, alt0);
+		waitForValue(sac, 1, format(SampleData.expectedValue("c_sac041", 1, 0), 0, "CFS"));
+
+		// Untick "Alt 1" in the harness Controls tab, as a user would
+		runOnEdt(() -> findAll(harness.getContentPane(), JCheckBox.class).stream()
+				.filter(b -> "Alt 1".equals(b.getText()))
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("No Alt 1 checkbox"))
+				.doClick());
+		assertFalse(harness.getDataSource().getSelectedStudy(1));
+
+		waitForValue(sac, 1, "");
+		waitForValue(sac, 0, alt0);
 	}
 
 	@Test
@@ -186,7 +242,13 @@ class SchematicViewUiTest
 		ShapeNode banks = onEdt(() -> node(schematic().getDiagram(), "D_BANKS"));
 		double diff = SampleData.expectedValue("d_banks", 1, 0) - SampleData.expectedValue("d_banks", 0, 0);
 		String expected = format(diff, 0, "CFS");
-		waitUntil("diff value " + expected, () -> valueText(banks, 1).filter(expected::equals).isPresent());
+		waitForValue(banks, 1, expected);
+
+		// Diff labels are red; the parent node's own pen must not be recoloured with them
+		Color altColor = onEdt(() -> valueNode(banks, 1).getPen().getColor());
+		assertEquals(Color.red, altColor);
+		Color parentColor = onEdt(() -> banks.getEffectivePen().getColor());
+		assertNotEquals(Color.red, parentColor, "value label shares its pen with the parent node");
 	}
 
 	@Test
@@ -195,7 +257,7 @@ class SchematicViewUiTest
 		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
 		ShapeNode jones = onEdt(() -> node(schematic().getDiagram(), "D_JONES"));
 		String expected = format(SampleData.expectedValue("d_jones", 0, 0), 2, "CFS");
-		waitUntil("2-decimal value " + expected, () -> valueText(jones, 0).filter(expected::equals).isPresent());
+		waitForValue(jones, 0, expected);
 	}
 
 	@Test
@@ -268,16 +330,61 @@ class SchematicViewUiTest
 	@Test
 	void decimalButtonOpensDialog() throws Exception {
 		click("Decimal");
-		// DecimalDialog is a JDialog, so it is not in Frame.getFrames()
-		waitUntil("Set Decimal Places dialog", () -> {
-			for (Window w : Window.getWindows()) {
-				if (w.isShowing() && w instanceof Dialog d && "Set Decimal Places".equals(d.getTitle())) {
-					return true;
-				}
-			}
-			return false;
-		});
+		waitUntil("Set Decimal Places dialog", () -> showingDialog("Set Decimal Places").isPresent());
+		Dialog dialog = onEdt(() -> showingDialog("Set Decimal Places").orElseThrow());
+		assertSame(harness, dialog.getOwner(), "dialog should be owned by the schematic's window");
+		assertTrue(dialog.isModal());
 		assertEquals(1, harness.getPresenter().countEvents("launchDialog"));
+	}
+
+	@Test
+	void decimalDialogOkStoresPreference() throws Exception {
+		click("Decimal");
+		waitUntil("Set Decimal Places dialog", () -> showingDialog("Set Decimal Places").isPresent());
+		runOnEdt(() -> {
+			Dialog dialog = showingDialog("Set Decimal Places").orElseThrow();
+			findAll(dialog, JTextField.class).get(0).setText("3");
+			button(dialog, "OK").doClick();
+		});
+		waitUntil("dialog closed", () -> showingDialog("Set Decimal Places").isEmpty());
+		assertEquals(3, prefs.getInt("decimalPlaces", -1));
+	}
+
+	@Test
+	void addTimeWindowDialogAddsNewWindow() throws Exception {
+		runOnEdt(() -> harness.selectDate("Add..."));
+		waitUntil("Add Time Window dialog", () -> showingDialog("Add Time Window").isPresent());
+		runOnEdt(() -> {
+			Dialog dialog = showingDialog("Add Time Window").orElseThrow();
+			List<JTextField> years = findAll(dialog, JTextField.class);
+			years.get(0).setText("1922");
+			years.get(1).setText("2003");
+			button(dialog, "OK").doClick();
+		});
+		String added = "OCT1922 - SEP2003";
+		waitUntil("dialog closed", () -> showingDialog("Add Time Window").isEmpty());
+		assertTrue(harness.getHost().getSchematicTwSelections().contains(added),
+				() -> "time windows: " + harness.getHost().getSchematicTwSelections());
+		assertEquals(added, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
+		String file = Files.readString(tempDir.resolve(MockSchematicHost.TW_FILE), StandardCharsets.UTF_8);
+		assertTrue(file.contains(added), "time-window file should contain the new window: " + file);
+	}
+
+	@Test
+	void saveAsPdfOpensOptionsDialog() throws Exception {
+		File pdf = tempDir.resolve("export.pdf").toFile();
+		harness.getPresenter().queueFileDialogResult(pdf.getAbsolutePath());
+		click("Save As");
+		waitUntil("PDF Options dialog", () -> showingDialog("PDF Options").isPresent());
+		runOnEdt(() -> button(showingDialog("PDF Options").orElseThrow(), "OK").doClick());
+		waitUntil("PDF written", () -> pdf.isFile() && pdf.length() > 0);
+	}
+
+	static AbstractButton button(Container root, String text) {
+		return findAll(root, AbstractButton.class).stream()
+				.filter(b -> text.equals(b.getText()))
+				.findFirst()
+				.orElseThrow(() -> new AssertionError("No button " + text));
 	}
 
 	// search / selection

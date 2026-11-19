@@ -4,6 +4,10 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.Set;
+import java.util.TreeSet;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,6 +34,7 @@ import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
+import com.mindfusion.diagramming.DiagramView;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
 import gov.ca.water.jdiagram.swing.views.DiagramPropertiesTableModel;
 import gov.ca.water.jdiagram.swing.views.SchematicEditor;
@@ -101,6 +106,26 @@ public final class HarnessFrame extends JFrame
 		setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 		setSize(1280, 800);
 		setLocationByPlatform(true);
+
+		// zoomToFit() in the constructor runs against a zero-size view; refit once the window is laid out.
+		// SchematicPanel only writes values for nodes inside the visible rect, so a bad fit hides values.
+		addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowOpened(WindowEvent e) {
+				fitDiagramToView();
+			}
+		});
+	}
+
+	/** Zooms so the whole diagram is inside the visible area. Call on the EDT after the window is shown. */
+	public void fitDiagramToView() {
+		schematic.getDiagramView().zoomToFit();
+	}
+
+	/** @return text of every non-transparent node currently inside the visible area (what gets values) */
+	public Set<String> visibleNodeNames() {
+		DiagramView view = schematic.getDiagramView();
+		return new TreeSet<>(schematic.getVisibleNodes(view.deviceToDoc(view.getVisibleRect())).keySet());
 	}
 
 	/**

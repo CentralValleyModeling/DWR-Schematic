@@ -5,6 +5,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JDialog;
@@ -19,14 +20,14 @@ public class AddTimeWindowDialog extends JDialog
 {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-	private JComboBox<String> dateList;
+	private final JComboBox<String> dateList;
 	private static String[] _monthSelections = { "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
 			"JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
 	private JTextField year1, year2;
 	private JComboBox<String> month1, month2;
 	private String newTW = "OCT1921 - SEP2015";
-	private SchematicPanelBase _schematicPanelBase;
+	private final SchematicPanelBase _schematicPanelBase;
 
 	public AddTimeWindowDialog(JFrame parent, SchematicPanelBase base, JComboBox<String> dateList) {
 
@@ -36,17 +37,17 @@ public class AddTimeWindowDialog extends JDialog
 		setTitle("Add Time Window");
 	}
 
+	/** Shows this dialog, modal to its owner. */
 	public void openDialog(){
-		JFrame frame = new JFrame();
-		frame.setTitle(getTitle());
-		createContents(frame);
-		frame.setSize(400, 150);
-		frame.setLocation(450, 300);
-		//shell.pack();
-		frame.setVisible(true);
+		setModal(true);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		createContents(this);
+		setSize(400, 150);
+		setLocationRelativeTo(getOwner());
+		setVisible(true);
 	}
 
-	protected void createContents(final JFrame frame) {
+	protected void createContents(final JDialog frame) {
 		GridLayout layout=new GridLayout();
 		layout.setColumns(5);
 		layout.setHgap(20);
@@ -86,35 +87,35 @@ public class AddTimeWindowDialog extends JDialog
 		ok.addActionListener(e -> {
 			int index = validateTW();
 			if (index == _schematicPanelBase.getHost().getSchematicTwSelections().size()) {
-				dateList.insertItemAt(newTW, index);
-				dateList.setSelectedIndex(index);
+				// Register the window with the host before selecting it: selecting fires the refresh, which
+				// looks the date up in getSchematicTwSelections() to decide whether it is a time window
 				_schematicPanelBase.getHost().getSchematicTwSelections().add(index, newTW);
 				saveTWFile();
-				frame.setVisible(false);
+				dateList.insertItemAt(newTW, index);
+				dateList.setSelectedIndex(index);
+				frame.dispose();
 			} else if (index >= 0) {
 				dateList.setSelectedIndex(index);
-				frame.setVisible(false);
+				frame.dispose();
 			}
 		});
 		frame.add(ok);
 
 		JButton cancel = new JButton();
 		cancel.setText("Cancel");
-		cancel.addActionListener(e -> frame.setVisible(false));
+		cancel.addActionListener(e -> frame.dispose());
 		frame.add(cancel);
 	}
 
 	public int validateTW() {
 		int startyear = Integer.parseInt(year1.getText());
 		int endyear = Integer.parseInt(year2.getText());
-		if (startyear > endyear) {
-			showWarning();
-			return -1;
-		} else if (startyear == endyear && month1.getSelectedIndex() > month2.getSelectedIndex()) {
+		if (startyear > endyear || (startyear == endyear && month1.getSelectedIndex() > month2.getSelectedIndex())) {
 			showWarning();
 			return -1;
 		} else {
-			newTW = month1.getName() + startyear + " - " + month2.getName() + endyear;
+			// getSelectedItem(), not getName(): getName() is the Swing component name (null here)
+			newTW = month1.getSelectedItem() + String.valueOf(startyear) + " - " + month2.getSelectedItem() + endyear;
 			int size = _schematicPanelBase.getHost().getSchematicTwSelections().size();
 			int index = size;
 			for (int i = 0; i < index; i++){
@@ -136,15 +137,12 @@ public class AddTimeWindowDialog extends JDialog
 			if (!file.exists()){
 				file.createNewFile();
 			}
-			FileWriter fw = new FileWriter(file.getAbsolutePath());
-			PrintWriter out = new PrintWriter(fw);
-			int size = _schematicPanelBase.getHost().getSchematicTwSelections().size();
-			if (size>1){
-				for (int i=1; i<size; i++){
+			try (PrintWriter out = new PrintWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
+				int size = _schematicPanelBase.getHost().getSchematicTwSelections().size();
+				for (int i = 1; i < size; i++) {
 					out.println(_schematicPanelBase.getHost().getSchematicTwSelections().get(i));
 				}
 			}
-			out.close();
 		} catch (IOException e) {
 			logger.atSevere().withCause(e).log("Failed to save time window file");
 		}

@@ -1,12 +1,19 @@
 package gov.ca.water.jdiagram.swing.harness;
 
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dialog;
+import java.awt.Window;
 import java.lang.reflect.InvocationTargetException;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
 import javax.swing.SwingUtilities;
 
 import com.mindfusion.diagramming.Diagram;
@@ -72,6 +79,16 @@ final class UiTestSupport
 	}
 
 	static void waitUntil(String description, Duration timeout, BooleanSupplier condition) throws Exception {
+		waitUntil(description, timeout, condition, () -> "");
+	}
+
+	/** As {@link #waitUntil(String, BooleanSupplier)}, appending {@code diagnostics} (read on the EDT) on timeout. */
+	static void waitUntil(String description, BooleanSupplier condition, Supplier<String> diagnostics) throws Exception {
+		waitUntil(description, DEFAULT_TIMEOUT, condition, diagnostics);
+	}
+
+	static void waitUntil(String description, Duration timeout, BooleanSupplier condition,
+			Supplier<String> diagnostics) throws Exception {
 		long deadline = System.nanoTime() + timeout.toNanos();
 		while (System.nanoTime() < deadline) {
 			if (Boolean.TRUE.equals(onEdt(condition::getAsBoolean))) {
@@ -79,7 +96,53 @@ final class UiTestSupport
 			}
 			Thread.sleep(50);
 		}
-		fail("Timed out after " + timeout.toSeconds() + "s waiting for: " + description);
+		String detail = onEdt(diagnostics::get);
+		fail("Timed out after " + timeout.toSeconds() + "s waiting for: " + description
+				+ (detail == null || detail.isEmpty() ? "" : " [" + detail + "]"));
+	}
+
+	/**
+	 * Waits for value refreshes started by the library to finish. {@code SchematicPanel.refreshValues} runs
+	 * {@code updateValues} on an untracked {@code new Thread}, and viewport changes schedule a refresh on a
+	 * 250 ms timer, so there is no handle to join: wait out the timer, then poll thread stacks.
+	 */
+	static void awaitValueRefreshes() throws Exception {
+		Thread.sleep(400);
+		flushEdt();
+		long deadline = System.nanoTime() + DEFAULT_TIMEOUT.toNanos();
+		while (System.nanoTime() < deadline) {
+			boolean busy = Thread.getAllStackTraces().values().stream()
+					.flatMap(Arrays::stream)
+					.anyMatch(f -> f.getClassName().endsWith("SchematicPanel") && f.getMethodName().equals("updateValues"));
+			if (!busy) {
+				return;
+			}
+			Thread.sleep(50);
+		}
+	}
+
+	/** @return the showing dialog with this title, if any */
+	static Optional<Dialog> showingDialog(String title) {
+		for (Window w : Window.getWindows()) {
+			if (w.isShowing() && w instanceof Dialog d && title.equals(d.getTitle())) {
+				return Optional.of(d);
+			}
+		}
+		return Optional.empty();
+	}
+
+	/** Depth-first list of every component of {@code type} under {@code root}, in layout order. */
+	static <T extends Component> List<T> findAll(Container root, Class<T> type) {
+		List<T> found = new ArrayList<>();
+		for (Component c : root.getComponents()) {
+			if (type.isInstance(c)) {
+				found.add(type.cast(c));
+			}
+			if (c instanceof Container child) {
+				found.addAll(findAll(child, type));
+			}
+		}
+		return found;
 	}
 
 	static ShapeNode node(Diagram diagram, String text) {
@@ -103,6 +166,15 @@ final class UiTestSupport
 		}
 		DiagramNode label = attached.get(studyId);
 		return label instanceof ShapeNode s ? Optional.ofNullable(s.getText()) : Optional.empty();
+	}
+
+	/** The value label node attached to {@code node} for {@code studyId}; fails if there is none. */
+	static DiagramNode valueNode(ShapeNode node, int studyId) {
+		Group group = node.getSubordinateGroup();
+		if (group == null || studyId >= group.getAttachedNodes().size()) {
+			throw new AssertionError("No value label " + studyId + " on " + node.getTextToEdit());
+		}
+		return group.getAttachedNodes().get(studyId);
 	}
 
 	static String format(double value, int decimals, String units) {

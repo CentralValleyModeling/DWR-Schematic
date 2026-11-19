@@ -90,17 +90,20 @@ public final class PDFOptionDialog extends JDialog
 		pageSizeMap.put("Note", PageSizesEnum.Note);
 	}
 
+	/**
+	 * Shows this dialog, modal to its owner. (Previously added a new JFrame to the parent window, which
+	 * throws IllegalArgumentException: a top-level window cannot be added to a container.)
+	 */
 	public void openDialog(){
-		JFrame frame = new JFrame();
-		getParent().add(frame);
-		frame.setTitle(getTitle());
-		createContents(frame);
-		frame.setSize(400, 150);
-		frame.setLocation(450, 300);
-		frame.setVisible(true);
+		setModal(true);
+		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+		createContents(this);
+		setSize(400, 150);
+		setLocationRelativeTo(getOwner());
+		setVisible(true);
 	}
 
-	private void createContents(final JFrame frame) {
+	private void createContents(final JDialog frame) {
   		JComboBox<String> pageSize;
 		GridLayout layout=new GridLayout();
 		layout.setColumns(14);
@@ -129,13 +132,13 @@ public final class PDFOptionDialog extends JDialog
 			pdfExp.setPageSize(dataSource.pageSize());
 			pdfExp.setAutoScale(AutoScale.FitToPage);
 			pdfExp.export(diagram, filename);
-			frame.setVisible(false);
+			frame.dispose();
 		});
 		frame.add(ok);
 
 		JButton cancel = new JButton();
 		cancel.setText("Cancel");
-		cancel.addActionListener(e -> frame.setVisible(false));
+		cancel.addActionListener(e -> frame.dispose());
 		frame.add(cancel);
 
 		frame.pack();

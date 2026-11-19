@@ -7,7 +7,6 @@ import java.awt.Container;
 import java.awt.Cursor;
 import java.awt.Font;
 import java.awt.Frame;
-import java.awt.Panel;
 import java.awt.Window;
 import java.awt.geom.Rectangle2D;
 import java.io.IOException;
@@ -24,7 +23,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
-import javax.swing.JRootPane;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -43,6 +41,7 @@ import com.mindfusion.diagramming.InplaceEditable;
 import com.mindfusion.diagramming.LinkEvent;
 import com.mindfusion.diagramming.NodeEvent;
 import com.mindfusion.diagramming.ShapeNode;
+import com.mindfusion.drawing.Pen;
 import com.mindfusion.diagramming.XmlException;
 import com.mindfusion.diagramming.export.SvgExporter;
 import com.mindfusion.drawing.Align;
@@ -166,20 +165,15 @@ public class SchematicPanel extends JComponent
 	 * it.
 	 */
 	public void createPartControl(JPanel parent) {
-		System.setProperty("sun.awt.noerasebackground", "true");
+		// Pure Swing. The legacy Eclipse version wrapped the view in a heavyweight java.awt.Panel + JRootPane
+		// (the SWT_AWT embedding pattern) and set sun.awt.noerasebackground. Lightweight popups such as the
+		// date combo's list then left unrepainted grey boxes over the diagram when closed. A host that embeds
+		// this in SWT should create that heavyweight bridge itself, around the parent it passes in here.
 		swingContainer = new JPanel(new BorderLayout());
-		Panel panel = new Panel(new BorderLayout()) {
-			@Override
-			public void update(java.awt.Graphics g) {
-				/* Do not erase the background */
-				paint(g);
-			}
-		};
-		swingContainer.add(panel, BorderLayout.CENTER);
-		JRootPane root = new JRootPane();
-		panel.add(root, BorderLayout.CENTER);
+		JPanel content = new JPanel(new BorderLayout());
+		swingContainer.add(content, BorderLayout.CENTER);
 		parent.add(swingContainer);
-		contentPane = root.getContentPane();
+		contentPane = content;
 		diagram = new Diagram();
 		diagramView = new DiagramView(diagram);
 		SchematicLicense.apply();
@@ -575,11 +569,8 @@ public class SchematicPanel extends JComponent
 							}
 							if (diagramNode != null) {
 								((InplaceEditable) diagramNode).setEditedText(value);
-								if (getBase().getDataSource().mode().equals(getBase().getDataSource().diff()) && studyId > 0) {
-									diagramNode.getPen().setColor(Color.red);
-								} else {
-									diagramNode.getPen().setColor(Color.black);
-								}
+								boolean isDiffAlt = getBase().getDataSource().mode().equals(getBase().getDataSource().diff()) && studyId > 0;
+								setValueColor(diagramNode, isDiffAlt ? Color.red : Color.black);
 								diagramNode.setToolTip(getBase().getToolTip(index, studyId,
 										getBase().getDataSource().mode().equals(getBase().getDataSource().diff())));
 							}
@@ -680,25 +671,40 @@ public class SchematicPanel extends JComponent
 		transparentTextNode.setTransparent(true);
 		transparentTextNode.setLocked(true);
 		transparentTextNode.setFont(shapeNode.getFont());
-		transparentTextNode.setPen(shapeNode.getPen());
+		// Give the label its own pen: sharing the parent's Pen instance means recolouring the label
+		// (e.g. red in Diff mode) also recolours the parent node. getPen() is null when the node uses the
+		// diagram default, so fall back to the effective pen.
+		Pen parentPen = shapeNode.getPen() != null ? shapeNode.getPen() : shapeNode.getEffectivePen();
+		transparentTextNode.setPen(parentPen != null ? parentPen.clone() : new Pen(Color.black));
 		transparentTextNode.setBrush(shapeNode.getBrush());
 		transparentTextNode.setTextFormat(tf);
 		transparentTextNode.attachTo(shapeNode, attachPos);
 		return transparentTextNode;
 	}
 
+	/**
+	 * Sets the colour of a value label. Labels from older saved schematics may have no pen of their own
+	 * ({@code getPen()} returns null when the item uses the diagram default), so create one if needed.
+	 */
+	private static void setValueColor(DiagramNode valueNode, Color color) {
+		Pen pen = valueNode.getPen();
+		if (pen == null) {
+			valueNode.setPen(new Pen(color));
+		} else {
+			pen.setColor(color);
+		}
+	}
+
 	public void clearValueBoxes(Rectangle2D.Float visibleRect) {
 		if (visibleRect == null) {
 			return;
 		}
-		Map<String, Object> visibleNodes = getVisibleNodes(visibleRect);
-		for (Object o : visibleNodes.values()) {
-			if (o instanceof ShapeNode) {
-				ShapeNode shapeNode = (ShapeNode) o;
-				Object id = shapeNode.getId();
-				if (id != null && id.equals(VALUE_TEXT)) {
-					shapeNode.setText("");
-				}
+		// Scan the diagram directly: value labels are transparent, and getVisibleNodes() skips transparent
+		// nodes, so going through it never found any labels and stale values (e.g. from a study that has
+		// since been deselected) were never cleared.
+		for (ShapeNode node : diagram.items(ShapeNode.class)) {
+			if (VALUE_TEXT.equals(node.getId()) && node.getBounds().intersects(visibleRect)) {
+				node.setText("");
 			}
 		}
 	}

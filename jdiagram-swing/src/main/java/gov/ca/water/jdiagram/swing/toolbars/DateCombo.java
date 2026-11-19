@@ -7,6 +7,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -110,11 +111,11 @@ public class DateCombo
 			} else {
 				schematicView.getBase().getHost().clearSchematicTwSelections();
 				schematicView.getBase().getHost().getSchematicTwSelections().add("Add...");
-				FileInputStream fs = new FileInputStream(file.getAbsolutePath());
-				BufferedReader br = new BufferedReader(new InputStreamReader(fs));
-				String line;
-				while((line = br.readLine()) != null){
-					schematicView.getBase().getHost().getSchematicTwSelections().add(line);
+				try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
+					String line;
+					while((line = br.readLine()) != null){
+						schematicView.getBase().getHost().getSchematicTwSelections().add(line);
+					}
 				}
 			}
 		} catch (Exception e) {
