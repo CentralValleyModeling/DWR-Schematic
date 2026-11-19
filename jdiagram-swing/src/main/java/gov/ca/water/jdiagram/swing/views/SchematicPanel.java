@@ -627,6 +627,26 @@ public class SchematicPanel extends JComponent
 		return false;
 	}
 
+	/**
+	 * Scrolls so {@code n} is centered, keeping the current zoom. Does nothing if it is already fully visible.
+	 * <p>
+	 * Uses {@code zoomToFit(rect)} with a rect the size of the current view (the same mechanism as Zoom In/Out)
+	 * rather than {@code DiagramView.bringIntoView}, which scrolled to an empty region in the editor.
+	 */
+	private void scrollToCenter(DiagramNode n) {
+		Rectangle2D.Float visible = diagramView.deviceToDoc(diagramView.getVisibleRect());
+		Rectangle2D.Float target = n.getBounds();
+		if (visible.width <= 0 || visible.height <= 0 || visible.contains(target)) {
+			return;
+		}
+		Rectangle2D.Float centred = new Rectangle2D.Float(
+				(float) (target.getCenterX() - visible.width / 2),
+				(float) (target.getCenterY() - visible.height / 2),
+				visible.width, visible.height);
+		diagramView.zoomToFit(centred);
+		overview.setDiagramView(diagramView);
+	}
+
 	/** Value labels and transparent text (titles, notes) are not schematic elements, so search skips them. */
 	private static boolean isSearchable(DiagramNode n) {
 		if (VALUE_TEXT.equals(n.getId())) {
@@ -643,7 +663,7 @@ public class SchematicPanel extends JComponent
 		Runnable show = () -> {
 			diagram.getSelection().clear();
 			n.setSelected(true);
-			diagramView.bringIntoView(n);
+			scrollToCenter(n);
 			diagramView.repaint();
 			selectionProvider.setSelection(List.of(n));
 		};

@@ -413,10 +413,24 @@ class SchematicViewUiTest
 			flushEdt();
 		}
 		assertFalse(onEdt(harness::visibleNodeNames).contains("D_BANKS"), "precondition: D_BANKS off screen");
+		DiagramView view = schematic().getDiagramView();
+		float zoomBefore = onEdt(view::getZoomFactor);
+		String before = onEdt(() -> geometry("D_BANKS"));
 
 		search("banks");
 		waitUntil("D_BANKS scrolled into view", () -> harness.visibleNodeNames().contains("D_BANKS"),
-				() -> "visible = " + harness.visibleNodeNames());
+				() -> "before search: " + before + "; after: " + geometry("D_BANKS"));
+		assertEquals(zoomBefore, onEdt(view::getZoomFactor), 0.01f, "search should scroll, not change zoom");
+	}
+
+	/** Zoom, visible document rect, node bounds and visible nodes, for failure messages. Call on the EDT. */
+	String geometry(String nodeText) {
+		DiagramView view = schematic().getDiagramView();
+		return "zoom=" + view.getZoomFactor()
+				+ " visibleRect=" + view.deviceToDoc(view.getVisibleRect())
+				+ " " + nodeText + "=" + node(schematic().getDiagram(), nodeText).getBounds()
+				+ " diagramBounds=" + schematic().getDiagram().getBounds()
+				+ " visibleNodes=" + harness.visibleNodeNames();
 	}
 
 	@Test
