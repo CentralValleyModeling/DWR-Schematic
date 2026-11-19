@@ -597,26 +597,61 @@ public class SchematicPanel extends JComponent
 		return variables;
 	}
 
+	/**
+	 * Finds the next node (after the previous match) whose text contains {@code text}, case-insensitively,
+	 * then selects it and scrolls it into view. Repeated calls cycle through the matches.
+	 *
+	 * @return true if a match was found
+	 */
 	public boolean findInView(String text) {
-		if (diagram == null || text == null) {
+		if (diagram == null || text == null || text.isBlank()) {
 			return false;
 		}
-		text = text.toLowerCase();
+		String needle = text.trim().toLowerCase();
 		DiagramNodeList nodes = diagram.getNodes();
-		int n_node = nodes.size();
-		for (int i_node = 1; i_node <= n_node; i_node++){
-			final int index_currentnode = (i_node + index_lastnode) % n_node;
-			final DiagramNode n = nodes.get(index_currentnode);
+		int count = nodes.size();
+		for (int step = 1; step <= count; step++) {
+			int index = (index_lastnode + step) % count;
+			DiagramNode n = nodes.get(index);
+			if (!isSearchable(n)) {
+				continue;
+			}
 			String nodeText = ((InplaceEditable) n).getTextToEdit();
-			if (nodeText != null && nodeText.toLowerCase().contains(text)) {
-				SwingUtilities.invokeLater(() -> {
-					diagramView.bringIntoView(n);
-					index_lastnode = index_currentnode;
-				});
+			if (nodeText != null && nodeText.toLowerCase().contains(needle)) {
+				// Record the position now, not in invokeLater, so quick repeated searches advance
+				index_lastnode = index;
+				showSearchResult(n);
 				return true;
 			}
 		}
 		return false;
+	}
+
+	/** Value labels and transparent text (titles, notes) are not schematic elements, so search skips them. */
+	private static boolean isSearchable(DiagramNode n) {
+		if (VALUE_TEXT.equals(n.getId())) {
+			return false;
+		}
+		return !(n instanceof ShapeNode s && s.getTransparent());
+	}
+
+	/**
+	 * Selects the match and scrolls to it. Scrolling alone gave no feedback when the node was already
+	 * on screen, so search looked broken.
+	 */
+	private void showSearchResult(DiagramNode n) {
+		Runnable show = () -> {
+			diagram.getSelection().clear();
+			n.setSelected(true);
+			diagramView.bringIntoView(n);
+			diagramView.repaint();
+			selectionProvider.setSelection(List.of(n));
+		};
+		if (SwingUtilities.isEventDispatchThread()) {
+			show.run();
+		} else {
+			SwingUtilities.invokeLater(show);
+		}
 	}
 
 	private ShapeNode createTextNodeWithIntermediates(int studyId,

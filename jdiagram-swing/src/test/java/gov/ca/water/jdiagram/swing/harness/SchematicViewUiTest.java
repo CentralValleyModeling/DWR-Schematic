@@ -393,10 +393,70 @@ class SchematicViewUiTest
 	void searchFindsNodesCaseInsensitively() throws Exception {
 		assertTrue(onEdt(() -> schematic().findInView("banks")));
 		assertFalse(onEdt(() -> schematic().findInView("not-a-node")));
+	}
+
+	@Test
+	void searchSelectsMatchAndUpdatesProperties() throws Exception {
+		search("jones");
+		ShapeNode jones = onEdt(() -> node(schematic().getDiagram(), "D_JONES"));
+		assertTrue(onEdt(jones::getSelected), "match should be selected");
+		assertEquals(1, (int) onEdt(() -> schematic().getDiagram().getSelection().getNodes().size()));
+		waitUntil("properties show the match", () -> "D_JONES".equals(harness.getPropertiesModel().getValueAt(0, 1)));
+		assertTrue(onEdt(() -> schematic().getSearchText().isLastSearchFound()));
+	}
+
+	@Test
+	void searchScrollsOffscreenMatchIntoView() throws Exception {
+		// Zoom in until D_BANKS (bottom row) is off screen
+		for (int i = 0; i < 6 && onEdt(harness::visibleNodeNames).contains("D_BANKS"); i++) {
+			click("Zoom In");
+			flushEdt();
+		}
+		assertFalse(onEdt(harness::visibleNodeNames).contains("D_BANKS"), "precondition: D_BANKS off screen");
+
+		search("banks");
+		waitUntil("D_BANKS scrolled into view", () -> harness.visibleNodeNames().contains("D_BANKS"),
+				() -> "visible = " + harness.visibleNodeNames());
+	}
+
+	@Test
+	void repeatedSearchCyclesThroughMatchesAndSkipsLabels() throws Exception {
+		// Put value labels on the diagram; their text ("1234 CFS") must never be a search hit
+		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
+		waitForValue(onEdt(() -> node(schematic().getDiagram(), "C_SAC041")), 0,
+				format(SampleData.expectedValue("c_sac041", 0, 0), 0, "CFS"));
+
+		Set<String> hits = new java.util.TreeSet<>();
+		for (int i = 0; i < 8; i++) {
+			search("s_");
+			hits.add(onEdt(() -> {
+				var selected = schematic().getDiagram().getSelection().getNodes();
+				return selected.isEmpty() ? "<none>" : ((ShapeNode) selected.get(0)).getTextToEdit();
+			}));
+		}
+		assertEquals(Set.of("S_SHSTA", "S_OROVL", "S_FOLSM"), hits, "should cycle through the three reservoirs");
+
+		search("cfs");
+		assertFalse(onEdt(() -> schematic().getSearchText().isLastSearchFound()), "value labels must not match");
+	}
+
+	@Test
+	void unmatchedSearchMarksFieldUntilEdited() throws Exception {
+		search("not-a-node");
+		SearchText searchText = schematic().getSearchText();
+		assertFalse(onEdt(searchText::isLastSearchFound));
+		assertEquals(SearchText.NOT_FOUND, onEdt(() -> searchText.getTextField().getBackground()));
+
+		runOnEdt(() -> searchText.getTextField().setText("banks"));
+		assertNotEquals(SearchText.NOT_FOUND, onEdt(() -> searchText.getTextField().getBackground()));
+	}
+
+	/** Types {@code query} into the toolbar search field and presses Enter, as a user would. */
+	void search(String query) throws Exception {
 		runOnEdt(() -> {
-			SearchText search = schematic().getSearchText();
-			search.getTextField().setText("jones");
-			search.getSearchButton().doClick();
+			JTextField field = schematic().getSearchText().getTextField();
+			field.setText(query);
+			field.postActionEvent();
 		});
 		flushEdt();
 	}
