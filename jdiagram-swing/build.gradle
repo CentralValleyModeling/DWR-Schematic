@@ -29,13 +29,6 @@ dependencies {
     implementation(libs.hec.monolith)
 }
 
-// Toolbar icons live in the repo-level icons/ folder; ActionHelper loads them from /images/ on the classpath.
-processResources {
-    from(rootProject.file('icons')) {
-        into 'images'
-    }
-}
-
 def licenseKeyProperty = 'wrims.mindfusion.licenseKey'
 
 tasks.register('runHarness', JavaExec) {

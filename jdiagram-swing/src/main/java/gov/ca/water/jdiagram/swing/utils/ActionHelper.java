@@ -8,8 +8,6 @@ import javax.swing.Action;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 
-import gov.ca.water.jdiagram.swing.views.SchematicPanel;
-
 /**
  * Utility class for creating actions. Left non-final to allow for behavior extension.
  */
@@ -19,7 +17,7 @@ public class ActionHelper {
 	}
 
 	public static Icon icon(String resource) {
-		URL url = SchematicPanel.class.getResource("/images/" + resource);
+		URL url = ActionHelper.class.getResource("/icons/" + resource);
 		return url == null ? null : new ImageIcon(url);
 	}
 

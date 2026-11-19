@@ -16,7 +16,7 @@ public class ImageUtil {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
 	/** Base package for relative image paths such as {@code "images/copy.png"}. */
-	private static final String RESOURCE_ROOT = "/gov/ca/water/jdiagram/";
+	private static final String RESOURCE_ROOT = "/icons/";
 
 	/** Returns an ImageIcon, or an empty icon if the path was invalid. */
 	public static ImageIcon createImageIcon(String path) {
