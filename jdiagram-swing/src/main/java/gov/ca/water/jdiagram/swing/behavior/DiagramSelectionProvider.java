@@ -1,11 +1,10 @@
-package gov.ca.water.jdiagram.swing.views;
+package gov.ca.water.jdiagram.swing.behavior;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EventListener;
 import java.util.EventObject;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.SwingUtilities;
 import javax.swing.event.EventListenerList;
 

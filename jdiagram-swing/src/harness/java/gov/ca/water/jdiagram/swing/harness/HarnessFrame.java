@@ -37,7 +37,7 @@ import javax.swing.WindowConstants;
 import com.mindfusion.diagramming.DiagramView;
 import gov.ca.water.jdiagram.core.SchematicContext;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
-import gov.ca.water.jdiagram.swing.views.DiagramPropertiesTableModel;
+import gov.ca.water.jdiagram.swing.behavior.DiagramPropertiesTableModel;
 import gov.ca.water.jdiagram.swing.views.SchematicEditor;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;

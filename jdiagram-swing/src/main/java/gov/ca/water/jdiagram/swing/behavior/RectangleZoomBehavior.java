@@ -1,4 +1,4 @@
-package gov.ca.water.jdiagram.swing;
+package gov.ca.water.jdiagram.swing.behavior;
 
 import java.awt.Cursor;
 import java.awt.Point;

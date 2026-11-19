@@ -29,7 +29,7 @@ public class EditSchematicElementPanel extends JPanel {
 		setLayout(new GridLayout(2,2));
 		colorLabel = new JLabel("Color: ");
 		add(colorLabel);
-		colorBox = new JComboBox();
+		colorBox = new JComboBox<>();
 		add(colorBox);
 		colorBox.addItem(Color.red);
 		colorBox.addItem(Color.blue);
@@ -37,7 +37,7 @@ public class EditSchematicElementPanel extends JPanel {
 		colorBox.addItem(Color.magenta);
 		shapeLabel = new JLabel("Shape: ");
 		add(shapeLabel);
-		shapeBox = new JComboBox();
+		shapeBox = new JComboBox<>();
 		add(shapeBox);
 		shapeBox.addItem(RECTANGLE);
 		shapeBox.addItem(CIRCLE);

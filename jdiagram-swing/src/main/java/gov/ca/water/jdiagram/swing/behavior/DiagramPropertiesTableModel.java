@@ -1,4 +1,4 @@
-package gov.ca.water.jdiagram.swing.views;
+package gov.ca.water.jdiagram.swing.behavior;
 
 import java.util.ArrayList;
 import java.util.List;
