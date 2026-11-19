@@ -30,7 +30,10 @@ import gov.ca.water.jdiagram.swing.utils.ImageUtil;
 import gov.ca.water.jdiagram.swing.views.SchematicEditor;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
-public class LegendPanel extends JPanel {
+/**
+ * Panel for displaying a legend diagram.
+ */
+public final class LegendPanel extends JPanel {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 	private final transient Diagram legendDiagram;
 	private final transient DiagramView legendDiagramView;

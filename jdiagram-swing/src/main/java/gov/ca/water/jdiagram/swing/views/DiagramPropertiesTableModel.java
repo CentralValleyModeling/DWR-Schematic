@@ -9,7 +9,7 @@ import com.mindfusion.diagramming.DiagramItem;
 
 /**
  * Two-column (Property, Value) table model showing the properties of the selected
- * diagram item. Swing replacement for the Eclipse Properties view.
+ * diagram item. Swing replacement for the Eclipse Properties view. Left non-final to allow for behavior extension.
  * <p>
  * Usage:
  * <pre>
@@ -19,50 +19,42 @@ import com.mindfusion.diagramming.DiagramItem;
  * </pre>
  */
 public class DiagramPropertiesTableModel extends AbstractTableModel
-		implements DiagramSelectionProvider.SelectionChangedListener
-{
+		implements DiagramSelectionProvider.SelectionChangedListener {
 	private static final String[] COLUMNS = {"Property", "Value"};
 
 	private final List<Map.Entry<String, String>> rows = new ArrayList<>();
 
 	@Override
-	public void selectionChanged(DiagramSelectionProvider.SelectionChangedEvent event)
-	{
+	public void selectionChanged(DiagramSelectionProvider.SelectionChangedEvent event) {
 		// DiagramSelectionProvider already delivers events on the EDT
 		setItem(event.getFirstElement());
 	}
 
-	public void setItem(DiagramItem item)
-	{
+	public void setItem(DiagramItem item) {
 		rows.clear();
-		if (item != null)
-		{
+		if (item != null) {
 			rows.addAll(new DiagramItemProperties(item).asMap().entrySet());
 		}
 		fireTableDataChanged();
 	}
 
 	@Override
-	public int getRowCount()
-	{
+	public int getRowCount() {
 		return rows.size();
 	}
 
 	@Override
-	public int getColumnCount()
-	{
+	public int getColumnCount() {
 		return COLUMNS.length;
 	}
 
 	@Override
-	public String getColumnName(int column)
-	{
+	public String getColumnName(int column) {
 		return COLUMNS[column];
 	}
 
 	@Override
-	public Object getValueAt(int rowIndex, int columnIndex)
-	{
+	public Object getValueAt(int rowIndex, int columnIndex) {
 		Map.Entry<String, String> row = rows.get(rowIndex);
 		return columnIndex == 0 ? row.getKey() : row.getValue();
 	}

@@ -11,8 +11,6 @@ import java.util.Set;
 import java.util.Vector;
 
 import com.google.common.flogger.FluentLogger;
-import gov.ca.water.jdiagram.core.interfaces.SchematicDataSource;
-import gov.ca.water.jdiagram.core.interfaces.SchematicHost;
 import gov.ca.water.jdiagram.core.utils.TimeOps;
 
 import hec.heclib.dss.CondensedReference;
@@ -31,41 +29,34 @@ public class SchematicPanelBase
 
 	private int baseIndex = 0;
 
-	private final SchematicDataSource dataSource;
+	private final SchematicContext context;
 
-	private final SchematicHost host;
-
-	public SchematicPanelBase(SchematicDataSource source, SchematicHost host) {
-		this.dataSource = source;
-		this.host = host;
+	public SchematicPanelBase(SchematicContext context) {
+		this.context = context;
 	}
 
-	public SchematicHost getHost() {
-		return host;
-	}
-
-	public SchematicDataSource getDataSource() {
-		return dataSource;
+	public SchematicContext getContext() {
+		return context;
 	}
 
 	public Map<String, String>[] retrieveUndebug(String date, Map<String, Object> names) {
-		List<String> tws = host.getSchematicTwSelections();
+		List<String> tws = getContext().core().getSchematicTwSelections();
 		for (int i = 0; i < tws.size() - 1; i++) {
 			if (date != null && date.equals(tws.get(i + 1))) {
-				if (dataSource.units().equals(dataSource.cfs())) {
-					if (dataSource.months().size() < 12) {
+				if (getContext().dataSource().units().equals(getContext().dataSource().cfs())) {
+					if (getContext().dataSource().months().size() < 12) {
 						return retrieveLongTermAverageSelectedMonths(date, names, true);
 					} else {
-						if (!host.getLongTermAverageDataCFS().containsKey(i)) {
+						if (!getContext().core().getLongTermAverageDataCFS().containsKey(i)) {
 							calculateLongTermAverage(i, date, true);
 						}
 						return retrieveLongTermAverage(i, names, true);
 					}
 				} else {
-					if (dataSource.months().size() < 12){
+					if (getContext().dataSource().months().size() < 12){
 						return retrieveLongTermAverageSelectedMonths(date, names, false);
 					}else{
-						if (!host.getLongTermAverageDataTAF().containsKey(i)) {
+						if (!getContext().core().getLongTermAverageDataTAF().containsKey(i)) {
 							calculateLongTermAverage(i, date, false);
 						}
 						return retrieveLongTermAverage(i, names, false);
@@ -83,7 +74,7 @@ public class SchematicPanelBase
 		baseIndex = 5;
 
 		for (int k = 0; k < 4; k++) {
-			if (dataSource.getSelectedStudy(k)) {
+			if (getContext().dataSource().getSelectedStudy(k)) {
 				if (baseIndex > k){
 					baseIndex = k;
 				}
@@ -93,17 +84,17 @@ public class SchematicPanelBase
 					name = name.toLowerCase();
 					boolean isStorage = false;
 					String value = "";
-					if (host.getSchematicVariableData(k).containsKey(name)) {
+					if (getContext().core().getSchematicVariableData(k).containsKey(name)) {
 						try {
-							HecMath dataSet = host.getSchematicVariableData(k).get(name);
-							if (dataSource.storageNames().contains(name)) {
+							HecMath dataSet = getContext().core().getSchematicVariableData(k).get(name);
+							if (getContext().dataSource().storageNames().contains(name)) {
 								isStorage = true;
 							}
 							TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
 							if (tsc != null) {
-								boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
+								boolean isTAFSelected = getContext().dataSource().units().equalsIgnoreCase("taf");
 								tsc = unitsConversion(isStorage, tsc, isTAFSelected, k, name);
-								if (dataSource.units().equals("TAF") && tsc.units.equals("TAF") && !getDataSource().isTAFMonthly()) {
+								if (getContext().dataSource().units().equals("TAF") && tsc.units.equals("TAF") && !getContext().dataSource().isTAFMonthly()) {
 									tsc = convertAnnualTAFData(tsc); // CB added constant IV
 								}
 								HecTime hecStartTime = new HecTime();
@@ -124,7 +115,7 @@ public class SchematicPanelBase
 									}
 								}
 
-								if (dataSource.mode().equals(dataSource.diff())) {
+								if (getContext().dataSource().mode().equals(getContext().dataSource().diff())) {
 									if (k > baseIndex) {
 										if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 											results[k].put(name, "N/A");
@@ -164,9 +155,9 @@ public class SchematicPanelBase
 
 		List<Map<String, Double>> termAverage= new ArrayList<>();
 		if (isCFS) {
-			host.getLongTermAverageDataCFS().put(pi, termAverage);
+			getContext().core().getLongTermAverageDataCFS().put(pi, termAverage);
 		} else {
-			host.getLongTermAverageDataTAF().put(pi, termAverage);
+			getContext().core().getLongTermAverageDataTAF().put(pi, termAverage);
 		}
 
 		int month = -1;
@@ -198,7 +189,7 @@ public class SchematicPanelBase
 			Map<String, Double> altAverage = new HashMap<>();
 			termAverage.add(altAverage);
 
-			Map<String, HecMath> altSchematicVariableData = host.getSchematicVariableData(i);
+			Map<String, HecMath> altSchematicVariableData = getContext().core().getSchematicVariableData(i);
 			if (altSchematicVariableData != null){
 				Set<String> keys = altSchematicVariableData.keySet();
 				Iterator<String> it = keys.iterator();
@@ -208,10 +199,10 @@ public class SchematicPanelBase
 					boolean isStorage = false;
 					try {
 						TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
-						if (dataSource.storageNames().contains(name)) {
+						if (getContext().dataSource().storageNames().contains(name)) {
 							isStorage = true;
 						}
-						boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
+						boolean isTAFSelected = getContext().dataSource().units().equalsIgnoreCase("taf");
 						tsc = unitsConversion(isStorage, tsc, isTAFSelected, i, name);
 						ht.set(startDate);
 						hecStartTime.set(tsc.startTime);
@@ -283,7 +274,7 @@ public class SchematicPanelBase
 			Map<String, Double> altAverage = new HashMap<>();
 			termAverage.add(altAverage);
 
-			Map<String, HecMath> altSchematicVariableData = host.getSchematicVariableData(i);
+			Map<String, HecMath> altSchematicVariableData = getContext().core().getSchematicVariableData(i);
 			Set<String> keys = names.keySet();
 			Iterator<String> it = keys.iterator();
 			while (it.hasNext()){
@@ -293,10 +284,10 @@ public class SchematicPanelBase
 					boolean isStorage = false;
 					try {
 						TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
-						if (dataSource.storageNames().contains(name)) {
+						if (getContext().dataSource().storageNames().contains(name)) {
 							isStorage = true;
 						}
-						boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
+						boolean isTAFSelected = getContext().dataSource().units().equalsIgnoreCase("taf");
 						tsc = unitsConversion(isStorage, tsc, isTAFSelected, i, name);
 						ht.set(startDate);
 						hecStartTime.set(tsc.startTime);
@@ -305,7 +296,7 @@ public class SchematicPanelBase
 						double sum = 0.0;
 						boolean inRange = false;
 						while (ht.compareTimes(hecEndTime) <= 0 && ht.compareTimes(endDate) <= 0) {
-							if (ht.compareTimes(hecStartTime) >= 0 && dataSource.months().contains(Month.of(ht.month()))) {
+							if (ht.compareTimes(hecStartTime) >= 0 && getContext().dataSource().months().contains(Month.of(ht.month()))) {
 								int valueIndex = (ht.year() - hecStartTime
 										.year())
 										* 12
@@ -350,13 +341,13 @@ public class SchematicPanelBase
 
 		List<Map<String, Double>> termAverage;
 		if (isCFS){
-			termAverage = host.getLongTermAverageDataCFS().get(index);
+			termAverage = getContext().core().getLongTermAverageDataCFS().get(index);
 		}else{
-			termAverage = host.getLongTermAverageDataTAF().get(index);
+			termAverage = getContext().core().getLongTermAverageDataTAF().get(index);
 		}
 
 		for (int k = 0; k < 4; k++) {
-			if (dataSource.getSelectedStudy(k)) {
+			if (getContext().dataSource().getSelectedStudy(k)) {
 				if (baseIndex > k){
 					baseIndex = k;
 				}
@@ -369,19 +360,19 @@ public class SchematicPanelBase
 						double data = altAverage.get(name);
 						String units;
 						if (isCFS) {
-							units = host.getAllSchematicVariableUnitsCFS(k).get(name);
+							units = getContext().core().getAllSchematicVariableUnitsCFS(k).get(name);
 						} else {
-							units = host.getAllSchematicVariableUnitsTAF(k).get(name);
+							units = getContext().core().getAllSchematicVariableUnitsTAF(k).get(name);
 						}
 						if (data > 100000000) {
 							value = "N/A";
 						} else {
 							value = data + " " + units;
-							if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()){
+							if (getContext().dataSource().units().equals("TAF") && !getContext().dataSource().isTAFMonthly()){
 								value = data * 12 + " " + units;
 							}
 						}
-						if (dataSource.mode().equals(dataSource.diff())) {
+						if (getContext().dataSource().mode().equals(getContext().dataSource().diff())) {
 							if (k > baseIndex) {
 								if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 									results[k].put(name, "N/A");
@@ -393,7 +384,7 @@ public class SchematicPanelBase
 								try {
 									double baseVal = Double.parseDouble(baseFields[0]);
 									double altVal = Double.parseDouble(altFields[0]);
-									if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()) {
+									if (getContext().dataSource().units().equals("TAF") && !getContext().dataSource().isTAFMonthly()) {
 										baseVal = baseVal * 12;
 										altVal = altVal * 12;
 									}
@@ -430,7 +421,7 @@ public class SchematicPanelBase
 		List<Map<String, Double>> termAverage = calculateLongTermAverageSelectedMonths(date, names, isCFS);
 
 		for (int k = 0; k < 4; k++) {
-			if (dataSource.getSelectedStudy(k)){
+			if (getContext().dataSource().getSelectedStudy(k)){
 				if (baseIndex > k){
 					baseIndex = k;
 				}
@@ -443,19 +434,19 @@ public class SchematicPanelBase
 						double data = altAverage.get(name);
 						String units;
 						if (isCFS) {
-							units = host.getAllSchematicVariableUnitsCFS(k).get(name);
+							units = getContext().core().getAllSchematicVariableUnitsCFS(k).get(name);
 						} else {
-							units = host.getAllSchematicVariableUnitsTAF(k).get(name);
+							units = getContext().core().getAllSchematicVariableUnitsTAF(k).get(name);
 						}
 						if (data > 100000000) {
 							value = "N/A";
 						} else {
 							value = data + " " + units;
-							if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()){
+							if (getContext().dataSource().units().equals("TAF") && !getContext().dataSource().isTAFMonthly()){
 								value = data * 12 + " " + units;
 							}
 						}
-						if (dataSource.mode().equals(dataSource.diff())) {
+						if (getContext().dataSource().mode().equals(getContext().dataSource().diff())) {
 							if (k > baseIndex) {
 								if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 									results[k].put(name, "N/A");
@@ -467,7 +458,7 @@ public class SchematicPanelBase
 								try {
 									double baseVal = Double.parseDouble(baseFields[0]);
 									double altVal = Double.parseDouble(altFields[0]);
-									if (dataSource.units().equals("TAF") && !dataSource.isTAFMonthly()) {
+									if (getContext().dataSource().units().equals("TAF") && !getContext().dataSource().isTAFMonthly()) {
 										baseVal = baseVal * 12;
 										altVal = altVal * 12;
 									}
@@ -503,23 +494,23 @@ public class SchematicPanelBase
 
 		Set<String> variableEnum = names.keySet();
 		for (int k = 0; k < 4; k++) {
-			if (dataSource.getSelectedStudy(k)){
+			if (getContext().dataSource().getSelectedStudy(k)){
 
 				for (String name : variableEnum) {
 					name = name.toLowerCase();
 					boolean isStorage = false;
 					String value = "";
-					if (host.getSchematicVariableData(k).containsKey(name)){
+					if (getContext().core().getSchematicVariableData(k).containsKey(name)){
 						try {
-							HecMath dataSet = host.getSchematicVariableData(k).get(name);
+							HecMath dataSet = getContext().core().getSchematicVariableData(k).get(name);
 							if (dataSet != null) {
-								if (dataSource.storageNames().contains(name)) {
+								if (getContext().dataSource().storageNames().contains(name)) {
 									isStorage = true;
 								}
 								TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
-								boolean isTAFSelected = dataSource.units().equalsIgnoreCase("taf");
+								boolean isTAFSelected = getContext().dataSource().units().equalsIgnoreCase("taf");
 								tsc = unitsConversion(isStorage, tsc, isTAFSelected, k, name);
-								if (dataSource.units().equals("TAF") && tsc.units.equals("TAF") && !dataSource.isTAFMonthly()) {
+								if (getContext().dataSource().units().equals("TAF") && tsc.units.equals("TAF") && !getContext().dataSource().isTAFMonthly()) {
 									tsc = convertAnnualTAFData(tsc); // CB added constant IV
 								}
 								HecTime hecStartTime = new HecTime();
@@ -540,7 +531,7 @@ public class SchematicPanelBase
 									}
 								}
 
-								if (dataSource.mode().equals(dataSource.diff())) {
+								if (getContext().dataSource().mode().equals(getContext().dataSource().diff())) {
 									if (k > baseIndex) {
 										if (results[baseIndex] == null || results[baseIndex].get(name) == null) {
 											results[k].put(name, "N/A");
@@ -567,7 +558,7 @@ public class SchematicPanelBase
 							}
 						} catch (Exception e) {
 							logger.atSevere().withCause(e).log("Error encountered");
-							host.reportError(e);
+							getContext().core().reportError(e);
 						}
 					}
 				}
@@ -578,22 +569,22 @@ public class SchematicPanelBase
 
 	public TimeSeriesContainer unitsConversion(boolean isStorage, TimeSeriesContainer dataSet, boolean force, int index, String name) {
 
-		if ((dataSource.units().equals("TAF") || force || isStorage)
+		if ((getContext().dataSource().units().equals("TAF") || force || isStorage)
 				&& dataSet.units.equals("CFS")) {
 			dataSet = adjustMonthlyData(dataSet, true); // CB added constant IV FACTOR
 			// so do not need to pass a
 			// factor
 			dataSet.units = "TAF";
-			host.getAllSchematicVariableUnitsTAF(index).put(name, "TAF");
+			getContext().core().getAllSchematicVariableUnitsTAF(index).put(name, "TAF");
 
-		} else if (dataSource.units().equals("CFS") && dataSet.units.equals("TAF")
+		} else if (getContext().dataSource().units().equals("CFS") && dataSet.units.equals("TAF")
 				&& !force && !isStorage) { // CB added section
 			dataSet = adjustMonthlyData(dataSet, false); // CB added constant IV
 			// FACTOR so do not
 			// need to pass a
 			// factor
 			dataSet.units = "CFS";
-			host.getAllSchematicVariableUnitsCFS(index).put(name, "CFS");
+			getContext().core().getAllSchematicVariableUnitsCFS(index).put(name, "CFS");
 		}
 		return dataSet;
 	}

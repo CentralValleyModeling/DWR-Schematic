@@ -2,7 +2,6 @@ package gov.ca.water.jdiagram.swing;
 
 import java.awt.Component;
 import java.awt.Window;
-import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
@@ -10,10 +9,11 @@ import javax.swing.SwingUtilities;
 import com.mindfusion.diagramming.DiagramView;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
-public interface DataPresenter
+/**
+ * Interface for launching UI components from the host application.
+ */
+public interface UILauncher
 {
-	void showTimeSeries(List<String> names);
-
 	/**
 	 * Runs the supplied action that opens a specified dialog on the host's UI thread.
 	 * Hosts embedded in another application (e.g. Eclipse) should override this to dispatch through

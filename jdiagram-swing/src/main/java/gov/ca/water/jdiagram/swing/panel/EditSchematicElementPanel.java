@@ -17,10 +17,10 @@ public class EditSchematicElementPanel extends JPanel {
 
 	private final JLabel colorLabel;
 	private final JLabel shapeLabel;
-	private final JComboBox shapeBox;
-	private final JComboBox colorBox;
+	private final JComboBox<String> shapeBox;
+	private final JComboBox<Color> colorBox;
 
-	public EditSchematicElementPanel(){
+	public EditSchematicElementPanel() {
 		setLayout(new GridLayout(2,2));
 		colorLabel = new JLabel("Color: ");
 		add(colorLabel);
@@ -39,8 +39,8 @@ public class EditSchematicElementPanel extends JPanel {
 		shapeBox.addItem("Triangle");
 	}
 
-	public void setDiagramItem(DiagramItem item){
-		if (item instanceof ShapeNode shapeNode){
+	public void setDiagramItem(DiagramItem item) {
+		if (item instanceof ShapeNode shapeNode) {
 			shapeBox.setVisible(true);
 			shapeLabel.setVisible(true);
 			Shape shape = shapeNode.getShape();
@@ -65,7 +65,7 @@ public class EditSchematicElementPanel extends JPanel {
 		String shapeName = "Rectangle";
 		if (id.equals("Alternative")) {
 			shapeName.equals("Triangle");
-		} else if (id.equals("Ellipse")){
+		} else if (id.equals("Ellipse")) {
 			shapeName.equals("Circle");
 		}
 		shapeBox.setSelectedItem(shapeName);
@@ -74,9 +74,9 @@ public class EditSchematicElementPanel extends JPanel {
 	public String getShape() {
 		String shapeName = (String) shapeBox.getSelectedItem();
 		String shapeId = shapeName;
-		if (shapeName.equals("Triangle")){
+		if (shapeName.equals("Triangle")) {
 			shapeId = "Alternative";
-		} else if (shapeName.equals("Circle")){
+		} else if (shapeName.equals("Circle")) {
 			shapeId = "Ellipse";
 		}
 		return shapeId;

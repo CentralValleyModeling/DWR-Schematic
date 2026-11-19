@@ -6,7 +6,7 @@ import javax.swing.JPanel;
 import com.mindfusion.diagramming.DiagramView;
 import com.mindfusion.diagramming.Overview;
 
-public class SchematicOverview extends JPanel
+public final class SchematicOverview extends JPanel
 {
 	/**
 	 * The ID of the view as specified by the extension.

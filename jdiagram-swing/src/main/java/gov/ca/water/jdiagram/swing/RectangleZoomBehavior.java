@@ -17,7 +17,7 @@ import com.mindfusion.diagramming.InteractionState;
 import gov.ca.water.jdiagram.swing.utils.ImageUtil;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
-public class RectangleZoomBehavior extends BehaviorBase {
+public final class RectangleZoomBehavior extends BehaviorBase {
 
 	SchematicOverview overview;
 	
@@ -33,9 +33,6 @@ public class RectangleZoomBehavior extends BehaviorBase {
 	@Override
 	public void pointerDown(Point mousePosition, MouseEvent e) {
 		ptStartDragDev = mousePosition;
-	}
-
-	public void pointerMove(Point mousePosition) {
 	}
 
 	@Override

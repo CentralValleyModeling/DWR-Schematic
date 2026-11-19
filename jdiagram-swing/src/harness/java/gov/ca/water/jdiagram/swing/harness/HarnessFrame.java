@@ -35,15 +35,15 @@ import javax.swing.SwingUtilities;
 import javax.swing.WindowConstants;
 
 import com.mindfusion.diagramming.DiagramView;
+import gov.ca.water.jdiagram.core.SchematicContext;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
 import gov.ca.water.jdiagram.swing.views.DiagramPropertiesTableModel;
 import gov.ca.water.jdiagram.swing.views.SchematicEditor;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
-import gov.ca.water.jdiagram.swing.views.SchematicView;
 
 /**
- * Window that hosts a {@link SchematicView} or {@link SchematicEditor} wired to fake data, with side panels
+ * Window that hosts a {@link SchematicPanel} or {@link SchematicEditor} wired to fake data, with side panels
  * for the overview, selected-item properties, an event log of host/presenter callbacks, and controls for
  * the data-source state. Used by {@link HarnessApp} and by the UI tests.
  * <p>
@@ -54,11 +54,12 @@ public final class HarnessFrame extends JFrame
 	public static final String SAMPLE_XML = "sample-schematic.xml";
 	public static final String SAMPLE_TIME_WINDOW = "OCT1921 - SEP2015";
 
-	private final boolean editor;
 	private final File workDir;
 	private final SampleData sampleData = new SampleData();
-	private final transient MockSchematicHost host;
+	private final transient MockSchematicCore host;
 	private final transient MockSchematicDataSource dataSource;
+	private final transient SchematicContext context;
+	private final boolean editor;
 	private final transient HarnessPresenter presenter = new HarnessPresenter();
 	private final SchematicPanel schematic;
 	private final DiagramPropertiesTableModel propertiesModel = new DiagramPropertiesTableModel();
@@ -69,8 +70,9 @@ public final class HarnessFrame extends JFrame
 		super(editor ? "jdiagram harness - SchematicEditor" : "jdiagram harness - SchematicView");
 		this.editor = editor;
 		this.workDir = workDir;
-		this.host = new MockSchematicHost(sampleData, preferences);
+		this.host = new MockSchematicCore(sampleData, preferences);
 		this.dataSource = new MockSchematicDataSource(workDir, host);
+		this.context = new SchematicContext(host, dataSource);
 
 		log.setEditable(false);
 		log.setName("eventLog");
@@ -80,8 +82,8 @@ public final class HarnessFrame extends JFrame
 		presenter.setDialogParent(this);
 		presenter.setLastDirectory(workDir);
 
-		SchematicPanelBase base = new SchematicPanelBase(dataSource, host);
-		schematic = editor ? new SchematicEditor(base, presenter) : new SchematicView(base, presenter);
+		SchematicPanelBase base = new SchematicPanelBase(context);
+		schematic = editor ? new SchematicEditor(base, presenter) : new SchematicPanel(base, presenter);
 
 		JPanel schematicContainer = new JPanel(new BorderLayout());
 		schematicContainer.setName("schematicContainer");
@@ -146,7 +148,7 @@ public final class HarnessFrame extends JFrame
 	/** Writes the time-window file read by DateCombo and a sample schematic for the Open action. */
 	public static void prepareWorkDir(File workDir) throws IOException {
 		Files.createDirectories(workDir.toPath());
-		File tw = new File(workDir, MockSchematicHost.TW_FILE);
+		File tw = new File(workDir, MockSchematicCore.TW_FILE);
 		if (!tw.exists()) {
 			Files.writeString(tw.toPath(), SAMPLE_TIME_WINDOW + System.lineSeparator(), StandardCharsets.UTF_8);
 		}
@@ -206,7 +208,7 @@ public final class HarnessFrame extends JFrame
 		panel.add(mode);
 
 		JPanel studies = titled("Studies", new GridLayout(0, 2));
-		for (int i = 0; i < MockSchematicHost.STUDY_COUNT; i++) {
+		for (int i = 0; i < MockSchematicCore.STUDY_COUNT; i++) {
 			final int index = i;
 			JCheckBox box = new JCheckBox("Alt " + i, dataSource.getSelectedStudy(i));
 			box.addActionListener(e -> { dataSource.setSelectedStudy(index, box.isSelected()); refreshValues(); });
@@ -311,7 +313,7 @@ public final class HarnessFrame extends JFrame
 		return sampleData;
 	}
 
-	public MockSchematicHost getHost() {
+	public MockSchematicCore getCore() {
 		return host;
 	}
 

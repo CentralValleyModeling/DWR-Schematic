@@ -9,7 +9,10 @@ import com.mindfusion.diagramming.DiagramItem;
 
 import hec.hecmath.HecMath;
 
-public interface SchematicHost
+/**
+ * Core interface for schematic diagram.
+ */
+public interface SchematicCore
 {
 	Preferences getPreferences();
 

@@ -48,7 +48,7 @@ import com.mindfusion.drawing.Align;
 import com.mindfusion.drawing.TextFormat;
 import gov.ca.water.jdiagram.core.SchematicLicense;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
-import gov.ca.water.jdiagram.swing.DataPresenter;
+import gov.ca.water.jdiagram.swing.UILauncher;
 import gov.ca.water.jdiagram.swing.RectangleZoomBehavior;
 import gov.ca.water.jdiagram.swing.dialog.DecimalDialog;
 import gov.ca.water.jdiagram.swing.dialog.PDFOptionDialog;
@@ -71,7 +71,7 @@ public class SchematicPanel extends JComponent
 
 	private DiagramView diagramView;
 
-	private final transient DataPresenter presenter;
+	private final transient UILauncher presenter;
 
 	private transient Diagram diagram;
 
@@ -131,7 +131,7 @@ public class SchematicPanel extends JComponent
 
 	private static String ISMONTHLYTAF = "ismonthlytaf";
 
-	public SchematicPanel(SchematicPanelBase base, DataPresenter presenter) {
+	public SchematicPanel(SchematicPanelBase base, UILauncher presenter) {
 		this.base = base;
 		this.presenter = presenter;
 	}
@@ -140,7 +140,7 @@ public class SchematicPanel extends JComponent
 		return base;
 	}
 
-	public DataPresenter getDataPresenter() {
+	public UILauncher getDataPresenter() {
 		return presenter;
 	}
 
@@ -222,9 +222,9 @@ public class SchematicPanel extends JComponent
 				name = name.toLowerCase();
 				final Vector<DataContainer> data=new Vector<>();
 				for (int i = 0; i < 4; i++){
-					if (base.getHost().getSchematicVariableData(i).containsKey(name)){
+					if (base.getContext().core().getSchematicVariableData(i).containsKey(name)){
 						try {
-							data.add(base.getHost().getSchematicVariableData(i).get(name).getData());
+							data.add(base.getContext().core().getSchematicVariableData(i).get(name).getData());
 						} catch (HecMathException e) {
 							logger.atFine().withCause(e).log("Error getting data for variable %s", name);
 						}
@@ -246,10 +246,10 @@ public class SchematicPanel extends JComponent
 					@Override
 					public void run() {
 						SwingUtilities.invokeLater(() -> {
-							if (!base.getDataSource().isDebugging()){
+							if (!base.getContext().dataSource().isDebugging()){
 								refreshValues(0, false);
 							}else{
-								if (base.getDataSource().target() != null) {
+								if (base.getContext().dataSource().target() != null) {
 									refreshValues(0, false);
 								}
 							}
@@ -318,7 +318,7 @@ public class SchematicPanel extends JComponent
 					getBase().loadAllSchematicVariableData();
 				} catch (Exception ex) {
 					logger.atFine().withCause(ex).log();
-					getBase().getHost().reportError(ex);
+					getBase().getContext().core().reportError(ex);
 				}
 			});
 		});
@@ -331,7 +331,7 @@ public class SchematicPanel extends JComponent
 			try {
 				save(file);
 			} catch (Exception ex) {
-				getBase().getHost().reportError(ex);
+				getBase().getContext().core().reportError(ex);
 			}
 		});
 
@@ -356,8 +356,8 @@ public class SchematicPanel extends JComponent
 		});
 
 		zoomRectAction = buildAction("Zoom to Rectangular", icon("ZoomToFit24.gif"), e -> {
-			base.getDataSource().setZoomToRect(!base.getDataSource().zoomToRect());
-			if (base.getDataSource().zoomToRect()) {
+			base.getContext().dataSource().setZoomToRect(!base.getContext().dataSource().zoomToRect());
+			if (base.getContext().dataSource().zoomToRect()) {
 				behavior = diagramView.getBehavior();
 				diagramView.setCustomBehavior(new RectangleZoomBehavior(
 						diagramView, overview));
@@ -371,8 +371,8 @@ public class SchematicPanel extends JComponent
 			if (magnifier == null) {
 				magnifier = new MagnifierPanel(diagramView);
 			}
-			base.getDataSource().setShowMagnifier(!base.getDataSource().showMagnifier());
-			magnifier.setShowing(base.getDataSource().showMagnifier());
+			base.getContext().dataSource().setShowMagnifier(!base.getContext().dataSource().showMagnifier());
+			magnifier.setShowing(base.getContext().dataSource().showMagnifier());
 		});
 
 		fontAction = buildAction("Font", icon("font.png"), e -> {
@@ -406,62 +406,62 @@ public class SchematicPanel extends JComponent
 			});
 		});
 
-		if(getBase().getHost().getPreferences() == null)
+		if(getBase().getContext().core().getPreferences() == null)
 		{
-			getBase().getHost().setPreferences(Preferences.userNodeForPackage(getClass()));
+			getBase().getContext().core().setPreferences(Preferences.userNodeForPackage(getClass()));
 		}
-		getBase().getDataSource().setTAFMonthly(getBase().getHost().getPreferences().getBoolean(ISMONTHLYTAF, true));
+		getBase().getContext().dataSource().setTAFMonthly(getBase().getContext().core().getPreferences().getBoolean(ISMONTHLYTAF, true));
 		tafTypeAction = buildAction("TAF Type", null, e -> {
 			presenter.launchDialog(() -> {
-				base.getDataSource().setTAFMonthly(!base.getDataSource().isTAFMonthly());
-				if (base.getDataSource().isTAFMonthly()) {
-					getBase().getHost().getPreferences().putBoolean(ISMONTHLYTAF, true);
+				base.getContext().dataSource().setTAFMonthly(!base.getContext().dataSource().isTAFMonthly());
+				if (base.getContext().dataSource().isTAFMonthly()) {
+					getBase().getContext().core().getPreferences().putBoolean(ISMONTHLYTAF, true);
 					tafTypeAction.putValue(Action.SMALL_ICON, icon("M.png"));
 				}else{
-					getBase().getHost().getPreferences().putBoolean(ISMONTHLYTAF, false);
+					getBase().getContext().core().getPreferences().putBoolean(ISMONTHLYTAF, false);
 					tafTypeAction.putValue(Action.SMALL_ICON, icon("Y.png"));
 				}
 			});
 		});
-		if (base.getDataSource().isTAFMonthly()) {
+		if (base.getContext().dataSource().isTAFMonthly()) {
 			tafTypeAction.putValue(Action.SMALL_ICON, icon("M.png"));
 		} else {
 			tafTypeAction.putValue(Action.SMALL_ICON, icon("Y.png"));
 		}
 
 		forwardAction = buildAction("Forward", icon("forward.png"), e -> {
-			int twSize = base.getHost().getSchematicTwSelections().size();
+			int twSize = base.getContext().core().getSchematicTwSelections().size();
 			JComboBox<String> dateList = dateCombo.getDateList();
 			int size = dateList.getItemCount();
-			if (getBase().getHost().getSelectedIndex() < twSize){
+			if (getBase().getContext().core().getSelectedIndex() < twSize){
 				if (twSize < size){
-					base.getHost().updateSelectedIndex(twSize);
-					dateList.setSelectedIndex(base.getHost().getSelectedIndex());
+					base.getContext().core().updateSelectedIndex(twSize);
+					dateList.setSelectedIndex(base.getContext().core().getSelectedIndex());
 				}
 			} else {
-				if (base.getHost().getSelectedIndex() + 1 < size){
-					base.getHost().updateSelectedIndex(base.getHost().getSelectedIndex() + 1);
-					dateList.setSelectedIndex(base.getHost().getSelectedIndex());
+				if (base.getContext().core().getSelectedIndex() + 1 < size){
+					base.getContext().core().updateSelectedIndex(base.getContext().core().getSelectedIndex() + 1);
+					dateList.setSelectedIndex(base.getContext().core().getSelectedIndex());
 				}
 			}
 		});
 
 		backwardAction = buildAction("Backward", icon("backward.png"), e -> {
-			int twSize = getBase().getHost().getSchematicTwSelections().size();
+			int twSize = base.getContext().core().getSchematicTwSelections().size();
 			JComboBox<String> dateList = dateCombo.getDateList();
 			int size = dateList.getItemCount();
-			if (base.getHost().getSelectedIndex() <= twSize){
+			if (base.getContext().core().getSelectedIndex() <= twSize){
 				if (twSize < size){
-					base.getHost().updateSelectedIndex(twSize);
-					dateList.setSelectedIndex(base.getHost().getSelectedIndex());
+					base.getContext().core().updateSelectedIndex(twSize);
+					dateList.setSelectedIndex(base.getContext().core().getSelectedIndex());
 				}
 			} else {
-				if (base.getHost().getSelectedIndex() >= size){
-					base.getHost().updateSelectedIndex(size - 1);
-					dateList.setSelectedIndex(base.getHost().getSelectedIndex());
+				if (base.getContext().core().getSelectedIndex() >= size){
+					base.getContext().core().updateSelectedIndex(size - 1);
+					dateList.setSelectedIndex(base.getContext().core().getSelectedIndex());
 				} else {
-					base.getHost().updateSelectedIndex(base.getHost().getSelectedIndex() - 1);
-					dateList.setSelectedIndex(base.getHost().getSelectedIndex());
+					base.getContext().core().updateSelectedIndex(base.getContext().core().getSelectedIndex() - 1);
+					dateList.setSelectedIndex(base.getContext().core().getSelectedIndex());
 				}
 			}
 		});
@@ -510,7 +510,7 @@ public class SchematicPanel extends JComponent
 			clearValueBoxes(lastVisibleRect);
 			lastVisibleRect = visibleRect;
 
-			final String selDate = base.getHost().getSelectedDate();
+			final String selDate = base.getContext().core().getSelectedDate();
 			if (selDate != null) {
 				new Thread(() -> updateValues(index, selDate, visibleRect)).start();
 			}
@@ -546,7 +546,7 @@ public class SchematicPanel extends JComponent
 						}
 						String value = valuesInStudy.get(name);
 						value = getBase().truncateAfterDecimal(value,
-								getBase().getHost().getPreferences().getInt(DECIMAL_PLACES, 0),
+								getBase().getContext().core().getPreferences().getInt(DECIMAL_PLACES, 0),
 								true);
 						if (object instanceof ShapeNode) {
 							ShapeNode shapeNode = (ShapeNode) object;
@@ -569,10 +569,10 @@ public class SchematicPanel extends JComponent
 							}
 							if (diagramNode != null) {
 								((InplaceEditable) diagramNode).setEditedText(value);
-								boolean isDiffAlt = getBase().getDataSource().mode().equals(getBase().getDataSource().diff()) && studyId > 0;
+								boolean isDiffAlt = getBase().getContext().dataSource().mode().equals(getBase().getContext().dataSource().diff()) && studyId > 0;
 								setValueColor(diagramNode, isDiffAlt ? Color.red : Color.black);
 								diagramNode.setToolTip(getBase().getToolTip(index, studyId,
-										getBase().getDataSource().mode().equals(getBase().getDataSource().diff())));
+										getBase().getContext().dataSource().mode().equals(getBase().getContext().dataSource().diff())));
 							}
 						}
 					}
@@ -757,7 +757,7 @@ public class SchematicPanel extends JComponent
 				presenter.launchDialog(() -> {
 					Window window = presenter.getShell(diagramView);
 					JFrame frame = window instanceof JFrame f ? f : null;
-					PDFOptionDialog dialog= new PDFOptionDialog(frame, filename, diagram, base.getDataSource());
+					PDFOptionDialog dialog= new PDFOptionDialog(frame, filename, diagram, base.getContext().dataSource());
 					dialog.openDialog();
 				});
 			} else if (filename.endsWith(".svg")) {
@@ -772,13 +772,11 @@ public class SchematicPanel extends JComponent
 	}
 
 	public void collectAllSchematicVariables() {
-		if (this instanceof SchematicView){
-			Map<String, Object> allNodes = getVisibleNodes(diagram.getBounds());
+		Map<String, Object> allNodes = getVisibleNodes(diagram.getBounds());
 
-			base.getHost().setAllSchematicVariableNames(new ArrayList<>());
-			for (String v : allNodes.keySet()) {
-				base.getHost().getAllSchematicVariableNames().add(v);
-			}
+		base.getContext().core().setAllSchematicVariableNames(new ArrayList<>());
+		for (String v : allNodes.keySet()) {
+			base.getContext().core().getAllSchematicVariableNames().add(v);
 		}
 	}
 }

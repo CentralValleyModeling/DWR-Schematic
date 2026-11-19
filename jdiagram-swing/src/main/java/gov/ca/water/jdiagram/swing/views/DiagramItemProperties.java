@@ -30,7 +30,6 @@ public record DiagramItemProperties(DiagramItem item)
 		this.item = Objects.requireNonNull(item, "item");
 	}
 
-
 	/**
 	 * @return property id to display value, in display order
 	 */
@@ -45,51 +44,41 @@ public record DiagramItemProperties(DiagramItem item)
 
 	public String getLabel()
 	{
-		if(item instanceof ShapeNode shapeNode)
-		{
+		if (item instanceof ShapeNode shapeNode) {
 			return nullToEmpty(shapeNode.getPlainText());
-		}
-		if(item instanceof DiagramLink link)
-		{
+		} else if (item instanceof DiagramLink link) {
 			return nullToEmpty(link.getText());
 		}
 		return "";
 	}
 
-	public String getIncoming()
-	{
+	public String getIncoming() {
 		return item instanceof DiagramNode node
 				? joinNodeNames(node.getIncomingLinks(), DiagramLink::getOrigin)
 				: "";
 	}
 
-	public String getOutgoing()
-	{
+	public String getOutgoing() {
 		return item instanceof DiagramNode node
 				? joinNodeNames(node.getOutgoingLinks(), DiagramLink::getDestination)
 				: "";
 	}
 
-	private static String joinNodeNames(DiagramLinkList links, Function<DiagramLink, DiagramNode> end)
-	{
+	private static String joinNodeNames(DiagramLinkList links, Function<DiagramLink, DiagramNode> end) {
 		StringBuilder buf = new StringBuilder();
-		for(int i = 0; i < links.size(); i++)
-		{
-			if(i > 0)
-			{
+		for (int i = 0; i < links.size(); i++) {
+			if (i > 0) {
 				buf.append(", ");
 			}
 			DiagramNode node = end.apply(links.get(i));
-			if(node instanceof InplaceEditable editable)
-			{
+			if (node instanceof InplaceEditable editable) {
 				buf.append(nullToEmpty(editable.getTextToEdit()));
 			}
 		}
 		return buf.toString();
 	}
 
-	private static String nullToEmpty(String s)
-	{
+	private static String nullToEmpty(String s) {
 		return s == null ? "" : s;
 	}
 }

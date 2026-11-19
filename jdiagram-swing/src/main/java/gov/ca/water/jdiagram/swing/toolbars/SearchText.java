@@ -19,8 +19,7 @@ import gov.ca.water.jdiagram.swing.views.SchematicPanel;
  * contains the entered string and scrolls it into view; repeating it cycles through matches. When nothing
  * matches, the field turns pink until the text is edited.
  */
-public class SearchText extends JPanel
-{
+public final class SearchText extends JPanel {
 	/** Background of the search field when the last search found nothing. */
 	public static final Color NOT_FOUND = new Color(255, 205, 205);
 

@@ -12,15 +12,15 @@ import java.util.prefs.Preferences;
 
 import com.mindfusion.diagramming.Diagram;
 import com.mindfusion.diagramming.DiagramItem;
-import gov.ca.water.jdiagram.core.interfaces.SchematicHost;
+import gov.ca.water.jdiagram.core.interfaces.SchematicCore;
 
 import hec.hecmath.HecMath;
 
 /**
- * In-memory {@link SchematicHost} backed by {@link SampleData}. Errors and warnings are recorded so
+ * In-memory {@link SchematicCore} backed by {@link SampleData}. Errors and warnings are recorded so
  * tests can assert on them, and forwarded to an optional event sink (the harness log panel).
  */
-public class MockSchematicHost implements SchematicHost
+public class MockSchematicCore implements SchematicCore
 {
 	public static final String TW_FILE = "harness_timewindows.txt";
 	public static final int STUDY_COUNT = 4;
@@ -42,7 +42,7 @@ public class MockSchematicHost implements SchematicHost
 	private Diagram clipboardDiagram;
 	private List<DiagramItem> clipboardItems;
 
-	public MockSchematicHost(SampleData sampleData, Preferences preferences) {
+	public MockSchematicCore(SampleData sampleData, Preferences preferences) {
 		this.sampleData = sampleData;
 		this.preferences = preferences;
 		for (int i = 0; i < STUDY_COUNT; i++) {

@@ -6,6 +6,7 @@ import java.awt.Window;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import javax.swing.JComboBox;
@@ -14,25 +15,24 @@ import javax.swing.JPanel;
 
 import com.google.common.flogger.FluentLogger;
 import gov.ca.water.jdiagram.core.utils.TimeOps;
-import gov.ca.water.jdiagram.swing.DataPresenter;
+import gov.ca.water.jdiagram.swing.UILauncher;
 import gov.ca.water.jdiagram.swing.dialog.AddTimeWindowDialog;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
-public class DateCombo
-{
+public final class DateCombo {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
 	private final SchematicPanel schematicView;
-	private final DataPresenter presenter;
+	private final UILauncher presenter;
 
 	private JComboBox<String> dateList;
 
-	public DateCombo(SchematicPanel schematicPanel, DataPresenter presenter) {
+	public DateCombo(SchematicPanel schematicPanel, UILauncher presenter) {
 		this.schematicView = schematicPanel;
 		this.presenter = presenter;
 	}
 
-	protected JPanel createControl(JPanel parent) {
+	private JPanel createControl(JPanel parent) {
 		JPanel container = new JPanel();
 		GridLayout glContainer = new GridLayout(0, 1);
 		glContainer.setHgap(0);
@@ -51,17 +51,17 @@ public class DateCombo
 		// Register after populating: JComboBox fires ActionEvents when the first item is added,
 		// which would otherwise pop the "Add time window" dialog on startup.
 		dateList.addActionListener(e -> {
-			schematicView.getBase().getHost().updateSelectedIndex(dateList.getSelectedIndex());
-			if (schematicView.getBase().getHost().getSelectedIndex() > 0){
-				schematicView.getBase().getHost().setSelectedDate((String) dateList.getSelectedItem());
-				if (!schematicView.getBase().getDataSource().isDebugging()) {
+			schematicView.getBase().getContext().core().updateSelectedIndex(dateList.getSelectedIndex());
+			if (schematicView.getBase().getContext().core().getSelectedIndex() > 0){
+				schematicView.getBase().getContext().core().setSelectedDate((String) dateList.getSelectedItem());
+				if (!schematicView.getBase().getContext().dataSource().isDebugging()) {
 					schematicView.refreshValues(0, true);
 				} else {
-					if (schematicView.getBase().getDataSource().target() != null) {
+					if (schematicView.getBase().getContext().dataSource().target() != null) {
 						schematicView.refreshValues(1, true);
 					}
 				}
-			} else if (schematicView.getBase().getHost().getSelectedIndex() == 0){
+			} else if (schematicView.getBase().getContext().core().getSelectedIndex() == 0){
 				presenter.launchDialog(() -> {
 					Window window = presenter.getShell(dateList);
 					JFrame parentFrame = window instanceof JFrame ? (JFrame) window : null;
@@ -76,8 +76,8 @@ public class DateCombo
 	public void setDateCombo(int startMonth, int startYear, int endMonth, int endYear) {
 		dateList.removeAllItems();
 		procTWFile();
-		for (int i = 0; i < schematicView.getBase().getHost().getSchematicTwSelections().size(); i++){
-			dateList.addItem(schematicView.getBase().getHost().getSchematicTwSelections().get(i));
+		for (int i = 0; i < schematicView.getBase().getContext().core().getSchematicTwSelections().size(); i++){
+			dateList.addItem(schematicView.getBase().getContext().core().getSchematicTwSelections().get(i));
 		}
 		int j = startMonth;
 		for (int i = startYear; i <= endYear; i++){
@@ -98,27 +98,27 @@ public class DateCombo
 	 */
 	public JComboBox<String> getDateList(){
 		if (dateList == null) {
-			buildDateList();
+			dateList = buildDateList();
 		}
 		return dateList;
 	}
 
 	public void procTWFile(){
 		try {
-			File file = new File(schematicView.getBase().getDataSource().getDataDir(), schematicView.getBase().getHost().getTwFile());
-			if (!file.exists()){
+			File file = new File(schematicView.getBase().getContext().dataSource().getDataDir(), schematicView.getBase().getContext().core().getTwFile());
+			if (!file.exists()) {
 				file.createNewFile();
 			} else {
-				schematicView.getBase().getHost().clearSchematicTwSelections();
-				schematicView.getBase().getHost().getSchematicTwSelections().add("Add...");
+				schematicView.getBase().getContext().core().clearSchematicTwSelections();
+				schematicView.getBase().getContext().core().getSchematicTwSelections().add("Add...");
 				try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 					String line;
-					while((line = br.readLine()) != null){
-						schematicView.getBase().getHost().getSchematicTwSelections().add(line);
+					while((line = br.readLine()) != null) {
+						schematicView.getBase().getContext().core().getSchematicTwSelections().add(line);
 					}
 				}
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.atFine().withCause(e).log("Error processing TW file");
 		}
 	}

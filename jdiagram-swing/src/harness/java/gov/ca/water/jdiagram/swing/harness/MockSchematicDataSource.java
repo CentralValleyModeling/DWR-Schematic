@@ -21,10 +21,11 @@ public class MockSchematicDataSource implements SchematicDataSource
 	public static final String TAF = "TAF";
 	public static final String BASE = "Base";
 	public static final String DIFF = "Diff";
+	public static final String SHAPE_LIB_PATH = "d:/temp/shapes.xml";
 
 	private final boolean[] selectedStudies = {true, true, false, false};
 	private final File dataDir;
-	private final MockSchematicHost host;
+	private final MockSchematicCore host;
 
 	private boolean debugging;
 	private String units = CFS;
@@ -36,14 +37,9 @@ public class MockSchematicDataSource implements SchematicDataSource
 	private boolean showMagnifier;
 	private PageSizesEnum pageSize = PageSizesEnum.Letter;
 
-	public MockSchematicDataSource(File dataDir, MockSchematicHost host) {
+	public MockSchematicDataSource(File dataDir, MockSchematicCore host) {
 		this.dataDir = dataDir;
 		this.host = host;
-	}
-
-	@Override
-	public boolean[] getSelectedStudies() {
-		return selectedStudies;
 	}
 
 	@Override
@@ -163,5 +159,10 @@ public class MockSchematicDataSource implements SchematicDataSource
 	@Override
 	public void setPageSize(PageSizesEnum pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	@Override
+	public String shapeLibPath() {
+		return SHAPE_LIB_PATH;
 	}
 }

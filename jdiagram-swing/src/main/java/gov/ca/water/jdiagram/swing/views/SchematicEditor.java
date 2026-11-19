@@ -68,40 +68,39 @@ import com.mindfusion.drawing.SolidBrush;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
 import gov.ca.water.jdiagram.core.utils.AttributeMapper;
 import gov.ca.water.jdiagram.core.utils.XmlUtilities;
-import gov.ca.water.jdiagram.swing.DataPresenter;
+import gov.ca.water.jdiagram.swing.UILauncher;
 import gov.ca.water.jdiagram.swing.panel.EditSchematicElementPanel;
 import org.w3c.dom.Document;
 
 import static gov.ca.water.jdiagram.swing.utils.ActionHelper.buildAction;
 import static gov.ca.water.jdiagram.swing.utils.ActionHelper.icon;
 
-public class SchematicEditor extends SchematicPanel {
+public final class SchematicEditor extends SchematicPanel {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
-	private final class CompartorOnNodeId implements Comparator<DiagramNode>
-	{
+	private final class CompartorOnNodeId implements Comparator<DiagramNode> {
 		@Override
 		public int compare(DiagramNode o1, DiagramNode o2) {
-			if (o1 == null){
-				if (o2 == null){
+			if (o1 == null) {
+				if (o2 == null) {
 					return 0;
 				} else {
 					return -1;
 				}
 			} else {
-				if (o2 == null){
+				if (o2 == null) {
 					return 1;
 				} else {
 					String id1 = getIdFor(o1);
 					String id2 = getIdFor(o2);
-					if (id1 == null){
-						if (id2 == null){
+					if (id1 == null) {
+						if (id2 == null) {
 							return 0;
 						} else {
 							return -1;
 						}
 					} else {
-						if (id2 == null){
+						if (id2 == null) {
 							return 1;
 						} else {
 							return id1.compareTo(id2);
@@ -130,8 +129,7 @@ public class SchematicEditor extends SchematicPanel {
 	private transient JMenuItem shrinkToElementsMenuItem;
 	private transient JMenuItem changePointsMenuItem;
 
-	public SchematicEditor(SchematicPanelBase base, DataPresenter presenter)
-	{
+	public SchematicEditor(SchematicPanelBase base, UILauncher presenter) {
 		super(base, presenter);
 	}
 
@@ -296,7 +294,7 @@ public class SchematicEditor extends SchematicPanel {
 				}
 				float zoomFactor = getDiagramView().getZoomFactor();
 				getDiagram().setAdjustmentHandlesSize(
-						Math.round(10 + 150 / zoomFactor));
+						(float) Math.round(10 + 150 / zoomFactor));
 			}
 
 			private boolean badValue(float x) {
@@ -321,13 +319,12 @@ public class SchematicEditor extends SchematicPanel {
 	}
 
 	private void makeEditorActions() {
-
 		exportAction = buildAction("Export Attributes", icon("export_attr.png"), e -> {
 			String fileToSave = chooseFileToExport();
 			try {
 				saveAttributesTo(fileToSave);
 			} catch (Exception ex) {
-				getBase().getHost().reportError(ex);
+				getBase().getContext().core().reportError(ex);
 			}
 		});
 
@@ -336,13 +333,13 @@ public class SchematicEditor extends SchematicPanel {
 			try {
 				loadAttributesFrom(fileToImport);
 			} catch (Exception ex) {
-				getBase().getHost().reportError(ex);
+				getBase().getContext().core().reportError(ex);
 			}
 		});
 
 		undoAction = buildAction("Undo", icon("undo.png"), e -> {
 			getDiagram().getUndoManager().undo();
-			if (this instanceof Action && getDiagram().getUndoManager().getHistory().getNextUndo() == null) {
+			if (e instanceof Action && getDiagram().getUndoManager().getHistory().getNextUndo() == null) {
 				setEnabled(false);
 			}
 		});
@@ -350,7 +347,7 @@ public class SchematicEditor extends SchematicPanel {
 
 		redoAction = buildAction("Redo", icon("redo.png"), e -> {
 			getDiagram().getUndoManager().redo();
-			if (this instanceof Action && getDiagram().getUndoManager().getHistory().getNextRedo() == null) {
+			if (e instanceof Action && getDiagram().getUndoManager().getHistory().getNextRedo() == null) {
 				setEnabled(false);
 			}
 		});
@@ -413,8 +410,7 @@ public class SchematicEditor extends SchematicPanel {
 
 	public void onCopy() {
 		Diagram d = getDiagram();
-		CompositeCmd compositeCmd = d.getUndoManager().startComposite(
-				"CopyALot");
+		CompositeCmd compositeCmd = d.getUndoManager().startComposite("CopyALot");
 		onCopy(d);
 		compositeCmd.execute();
 
@@ -422,20 +418,20 @@ public class SchematicEditor extends SchematicPanel {
 		try {
 			diagramView.copyToClipboard(true);
 		} catch (IOException | XmlException e) {
-			getBase().getHost().reportError(e);
+			getBase().getContext().core().reportError(e);
 		}
-		getBase().getHost().setDiagram(d);
+		getBase().getContext().core().setDiagram(d);
 	}
 
 	public void onCopy(Diagram d) {
-		getBase().getHost().setDiagramItems(new ArrayList<>());
+		getBase().getContext().core().setDiagramItems(new ArrayList<>());
 		HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<DiagramNode, DiagramNode>();
 		if (!(d.getSelection().getNodes().isEmpty())) {
 			DiagramNodeList nodes = d.getSelection().getNodes();
 			for (DiagramNode node : nodes) {
 				if (node instanceof ShapeNode snode) {
 					ShapeNode clone = (ShapeNode) snode.clone(true);
-					getBase().getHost().getDiagramItems().add(clone);
+					getBase().getContext().core().getDiagramItems().add(clone);
 					selectedToAddedMap.put(snode, clone);
 				}
 			}
@@ -445,7 +441,7 @@ public class SchematicEditor extends SchematicPanel {
 			for (DiagramLink link : links) {
 				if (link instanceof DiagramLink) {
 					DiagramLink linkClone = (DiagramLink) link.clone(true);
-					getBase().getHost().getDiagramItems().add(linkClone);
+					getBase().getContext().core().getDiagramItems().add(linkClone);
 					// connect it up if origin or destination nodes were
 					// selected and
 					// copied over
@@ -469,8 +465,8 @@ public class SchematicEditor extends SchematicPanel {
 	}
 
 	public void onPaste() {
-		if (lastMouseClickedPosition == null || getBase().getHost().getDiagramItems() == null
-				|| getBase().getHost().getDiagramItems().isEmpty()) {
+		if (lastMouseClickedPosition == null || getBase().getContext().core().getDiagramItems() == null
+				|| getBase().getContext().core().getDiagramItems().isEmpty()) {
 			return;
 		}
 
@@ -481,15 +477,15 @@ public class SchematicEditor extends SchematicPanel {
 				"PasteALot");
 		diagram.getLinkRouter().Suspend();
 
-		DiagramItem diagramItem = getBase().getHost().getDiagramItems().getFirst();
+		DiagramItem diagramItem = getBase().getContext().core().getDiagramItems().getFirst();
 		java.awt.geom.Rectangle2D.Float bounds = diagramItem.getBounds();
 		float delX = (float) lastMouseClickedPosition.getX() - bounds.x;
 		float delY = (float) lastMouseClickedPosition.getY() - bounds.y;
 
-		if (getBase().getHost().getDiagram().equals(diagram)){
+		if (getBase().getContext().core().getDiagram().equals(diagram)){
 			//first add all nodes
 			HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<DiagramNode, DiagramNode>();
-			for (DiagramItem itemOriginal : getBase().getHost().getDiagramItems()) {
+			for (DiagramItem itemOriginal : getBase().getContext().core().getDiagramItems()) {
 				if (itemOriginal == null) {
 					continue;
 				}
@@ -507,7 +503,7 @@ public class SchematicEditor extends SchematicPanel {
 				//FIXME: alignTo grid
 			}
 			//then add links connecting them to nodes if selected and added
-			for (DiagramItem itemOriginal : getBase().getHost().getDiagramItems()) {
+			for (DiagramItem itemOriginal : getBase().getContext().core().getDiagramItems()) {
 				if (itemOriginal == null) {
 					continue;
 				}
@@ -550,7 +546,7 @@ public class SchematicEditor extends SchematicPanel {
 			try {
 				diagramView.pasteFromClipboard(delX, delY, false);
 			} catch (IOException | XmlException e) {
-				getBase().getHost().reportError(e);
+				getBase().getContext().core().reportError(e);
 			}
 		}
 	}
@@ -700,9 +696,8 @@ public class SchematicEditor extends SchematicPanel {
 	public void alignSelectedNodes(final Orientation orientation) {
 		Diagram diagram = getDiagram();
 		DiagramNodeList nodes = diagram.getSelection().getNodes();
-		List<DiagramNode> sortedNodes = new ArrayList<>();
-		sortedNodes.addAll(nodes);
-		Collections.sort(sortedNodes, (arg0, arg1) -> switch(orientation)
+		List<DiagramNode> sortedNodes = new ArrayList<>(nodes);
+		sortedNodes.sort((arg0, arg1) -> switch(orientation)
 		{
 			case Orientation.Horizontal -> (int) Math.signum(arg0.getBounds().x - arg1.getBounds().x);
 			case Orientation.Vertical -> (int) Math.signum(arg0.getBounds().y - arg1.getBounds().y);
@@ -781,7 +776,7 @@ public class SchematicEditor extends SchematicPanel {
 	}
 
 	public void addToShapeLibrary() throws Exception {
-		String filename = "d:/temp/shapes.xml";
+		String filename = getBase().getContext().dataSource().shapeLibPath();
 		if (clickedItem instanceof ShapeNode snode) {
 			Shape s = snode.getShape();
 			Document doc = XmlUtilities.newDocument();
@@ -790,98 +785,105 @@ public class SchematicEditor extends SchematicPanel {
 		}
 	}
 
-	protected void saveAttributesTo(String fileToSave) throws IOException {
+	private void saveAttributesTo(String fileToSave) throws IOException {
 		AttributeMapper mapper = new AttributeMapper();
 		Diagram d = getDiagram();
-		PrintWriter wr = new PrintWriter(fileToSave);
-		ArrayList<DiagramNode> nodes = new ArrayList<>();
-		for (DiagramNode n : d.items(DiagramNode.class)) {
-			nodes.add(n);
-		}
+		try (PrintWriter wr = new PrintWriter(fileToSave)) {
+			ArrayList<DiagramNode> nodes = new ArrayList<>();
+			for(DiagramNode n : d.items(DiagramNode.class)) {
+				nodes.add(n);
+			}
 
-		nodes.sort(new CompartorOnNodeId());
+			nodes.sort(new CompartorOnNodeId());
 
-		for (DiagramNode n : nodes) {
-			if (n instanceof ShapeNode s){
-				Pen pen = s .getPen();
-				Color fillColor = null;
-				Brush brush = s.getBrush();
-				Shape shape = s.getShape();
-				CustomDraw customdraw=s.getCustomDraw();
-				if (brush instanceof SolidBrush brushSolid) {
-					fillColor = brushSolid.getColor();
-				} else {
-					logger.atFine().log("brush type is :" + brush.getClass()
-							+ " for node: " + ((InplaceEditable)n).getTextToEdit());
+			for(DiagramNode n : nodes) {
+				if(n instanceof ShapeNode s) {
+					Pen pen = s.getPen();
+					Color fillColor = null;
+					Brush brush = s.getBrush();
+					Shape shape = s.getShape();
+					CustomDraw customdraw = s.getCustomDraw();
+					if(brush instanceof SolidBrush brushSolid) {
+						fillColor = brushSolid.getColor();
+					} else {
+						logger.atFine().log("brush type is :" + brush.getClass()
+								+ " for node: " + ((InplaceEditable) n).getTextToEdit());
+					}
+					String id = getIdFor(n);
+					if(id.length() > 40) {
+						id = id.substring(0, 39);
+					}
+
+					String attributeName = mapper.getAttributeName(pen, brush, shape, customdraw);
+					wr.printf("%-45s|%s|%s|%3.1f|%s|%s|%s|%s%n", id, mapper
+							.formatColor(pen.getColor()), mapper.formatStyle(pen
+							.getDashStyle()), pen.getWidth(), mapper
+							.formatColor(fillColor), mapper.formatShape(shape), mapper.formatCustomDraw(customdraw), attributeName);
 				}
-				String id = getIdFor(n);
-				if (id.length() > 40){
-					id=id.substring(0, 39);
-				}
-
-				String attributeName = mapper.getAttributeName(pen, brush, shape, customdraw);
-				wr.printf("%-45s|%s|%s|%3.1f|%s|%s|%s|%s%n", id, mapper
-						.formatColor(pen.getColor()), mapper.formatStyle(pen
-						.getDashStyle()), pen.getWidth(), mapper
-						.formatColor(fillColor), mapper.formatShape(shape), mapper.formatCustomDraw(customdraw), attributeName);
 			}
 		}
-		wr.close();
 	}
 
-	protected void loadAttributesFrom(String fileToImport) throws IOException
-	{
+	private void loadAttributesFrom(String fileToImport) throws IOException {
 		AttributeMapper mapper = new AttributeMapper();
 		Diagram d = getDiagram();
-		LineNumberReader reader = new LineNumberReader(new FileReader(
-				fileToImport));
-		String line = null;
-		HashMap<String, AttributeMapper.Attribute> idToAttributeMap = new HashMap<>();
-		while ((line = reader.readLine()) != null) {
-			String[] fields = line.split("\\|");
-			String id = fields[0].trim();
-			AttributeMapper.Attribute attr = null;
-			if (fields.length > 7) {
-				String attributeName = fields[7];
-				if (attributeName != null && !attributeName.isEmpty()) {
-					attr = mapper.getAttribute(attributeName);
+		try (LineNumberReader reader = new LineNumberReader(new FileReader(fileToImport)))
+		{
+			String line = null;
+			HashMap<String, AttributeMapper.Attribute> idToAttributeMap = new HashMap<>();
+			while((line = reader.readLine()) != null)
+			{
+				String[] fields = line.split("\\|");
+				String id = fields[0].trim();
+				AttributeMapper.Attribute attr = null;
+				if(fields.length > 7)
+				{
+					String attributeName = fields[7];
+					if(attributeName != null && !attributeName.isEmpty())
+					{
+						attr = mapper.getAttribute(attributeName);
+					}
 				}
-			}
-			if (attr == null) {
-				String line_attr = line.substring(line.indexOf("|")+1);
+				if(attr == null)
+				{
+					String line_attr = line.substring(line.indexOf("|") + 1);
 
-				Pen pen = mapper.parsePen(line_attr);
-				Brush brush = mapper.parseBrush(line_attr);
-				Shape shape = mapper.parseShape(line_attr);
-				CustomDraw customdraw = mapper.parseCustomDraw(line_attr);
+					Pen pen = mapper.parsePen(line_attr);
+					Brush brush = mapper.parseBrush(line_attr);
+					Shape shape = mapper.parseShape(line_attr);
+					CustomDraw customdraw = mapper.parseCustomDraw(line_attr);
 
-				attr = new AttributeMapper.Attribute();
-				attr.pen = pen;
-				attr.brush = brush;
-				attr.shape = shape;
-				attr.customdraw = customdraw;
+					attr = new AttributeMapper.Attribute();
+					attr.pen = pen;
+					attr.brush = brush;
+					attr.shape = shape;
+					attr.customdraw = customdraw;
+				}
+
+				idToAttributeMap.put(id, attr);
 			}
 
-			idToAttributeMap.put(id, attr);
-		}
-		reader.close();
-
-		DiagramNodeList nodes = d.getNodes();
-		getDiagramView().suspendRepaint();
-		for (DiagramNode n : nodes) {
-			String id = getIdFor(n);
-			if (id.length() > 40){
-				id=id.substring(0, 39);
-			}
-			AttributeMapper.Attribute attribute = idToAttributeMap.get(id);
-			if (attribute == null) {
-				continue;
-			}
-			if (n instanceof ShapeNode s){
-				s.setPen(attribute.pen);
-				s.setBrush(attribute.brush);
-				s.setShape(attribute.shape);
-				s.setCustomDraw(attribute.customdraw);
+			DiagramNodeList nodes = d.getNodes();
+			getDiagramView().suspendRepaint();
+			for(DiagramNode n : nodes)
+			{
+				String id = getIdFor(n);
+				if(id.length() > 40)
+				{
+					id = id.substring(0, 39);
+				}
+				AttributeMapper.Attribute attribute = idToAttributeMap.get(id);
+				if(attribute == null)
+				{
+					continue;
+				}
+				if(n instanceof ShapeNode s)
+				{
+					s.setPen(attribute.pen);
+					s.setBrush(attribute.brush);
+					s.setShape(attribute.shape);
+					s.setCustomDraw(attribute.customdraw);
+				}
 			}
 		}
 		getDiagramView().resumeRepaint();

@@ -10,9 +10,12 @@ import javax.swing.ImageIcon;
 
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
+/**
+ * Utility class for creating actions. Left non-final to allow for behavior extension.
+ */
 public class ActionHelper {
 	private ActionHelper() {
-		throw new AssertionError("Utility class");
+		throw new IllegalStateException("Utility class, cannot be instantiated");
 	}
 
 	public static Icon icon(String resource) {

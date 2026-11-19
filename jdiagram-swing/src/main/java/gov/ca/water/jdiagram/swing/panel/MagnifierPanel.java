@@ -15,6 +15,9 @@ import javax.swing.SwingUtilities;
 import com.mindfusion.diagramming.Diagram;
 import com.mindfusion.diagramming.DiagramView;
 
+/**
+ * Panel for displaying a magnified view of a diagram.
+ */
 public final class MagnifierPanel extends JPanel
 {
 	private float zoomLevel = 50;

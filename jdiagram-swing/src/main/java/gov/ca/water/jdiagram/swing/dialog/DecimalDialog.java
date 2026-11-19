@@ -8,16 +8,19 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import gov.ca.water.jdiagram.swing.DataPresenter;
+import gov.ca.water.jdiagram.swing.UILauncher;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
+/**
+ * Dialog for selecting number of decimal places to display.
+ */
 public final class DecimalDialog extends JDialog
 {
 	private static String DECIMAL_PLACES = "decimalPlaces";
 	private final SchematicPanel schematic;
-	private final transient DataPresenter presenter;
+	private final transient UILauncher presenter;
 
-	public DecimalDialog(JFrame parent, SchematicPanel schematic, DataPresenter presenter) {
+	public DecimalDialog(JFrame parent, SchematicPanel schematic, UILauncher presenter) {
 		super(parent);
 		this.schematic = schematic;
 		this.presenter = presenter;
@@ -34,7 +37,7 @@ public final class DecimalDialog extends JDialog
 		setVisible(true);
 	}
 
-	protected void createContents(final JDialog frame) {
+	private void createContents(final JDialog frame) {
 		GridLayout layout = new GridLayout();
 		layout.setColumns(14);
 		layout.setVgap(20);
@@ -48,7 +51,7 @@ public final class DecimalDialog extends JDialog
 
 		final JTextField decimalText = new JTextField();
 		frame.add(decimalText);
-		decimalText.setText(String.valueOf(schematic.getBase().getHost().getPreferences().getInt(DECIMAL_PLACES, 0)));
+		decimalText.setText(String.valueOf(schematic.getBase().getContext().core().getPreferences().getInt(DECIMAL_PLACES, 0)));
 		decimalText.setHorizontalAlignment(SwingConstants.LEFT);
 
 		JButton ok = new JButton();
@@ -56,11 +59,11 @@ public final class DecimalDialog extends JDialog
 		ok.setHorizontalAlignment(SwingConstants.LEFT);
 		ok.addActionListener(e -> {
 			final int numberDecimals = Integer.parseInt(decimalText.getText());
-			schematic.getBase().getHost().getPreferences().putInt(DECIMAL_PLACES, numberDecimals);
-			if (!schematic.getBase().getDataSource().isDebugging()) {
+			schematic.getBase().getContext().core().getPreferences().putInt(DECIMAL_PLACES, numberDecimals);
+			if (!schematic.getBase().getContext().dataSource().isDebugging()) {
 				schematic.refreshValues(0, false);
 			} else {
-				if (schematic.getBase().getDataSource().target() != null){
+				if (schematic.getBase().getContext().dataSource().target() != null){
 					schematic.refreshValues(1, false);
 				}
 			}

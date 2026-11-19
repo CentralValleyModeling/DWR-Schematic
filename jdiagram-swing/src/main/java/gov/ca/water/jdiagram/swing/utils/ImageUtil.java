@@ -5,9 +5,12 @@ import javax.swing.ImageIcon;
 
 import com.google.common.flogger.FluentLogger;
 
+/**
+ * Utility class for creating image icons. Left non-final to allow for behavior extension.
+ */
 public class ImageUtil {
  private ImageUtil() {
-   throw new AssertionError("This utility class should not be instantiated");
+   throw new IllegalStateException("This utility class should not be instantiated");
  }
 
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();

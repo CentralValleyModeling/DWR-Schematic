@@ -12,7 +12,10 @@ import hec.heclib.dss.CondensedReference;
 import hec.heclib.dss.HecDSSUtilities;
 import hec.heclib.dss.HecDss;
 
-public class TimeOps
+/**
+ * Utility class for time operations built upon HEC DSS utilities.
+ */
+public final class TimeOps
 {
 	TimeOps() {
 		throw new IllegalStateException("TimeOps is a static class and cannot be instantiated");

@@ -12,15 +12,15 @@ import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
 import com.mindfusion.diagramming.DiagramView;
-import gov.ca.water.jdiagram.swing.DataPresenter;
+import gov.ca.water.jdiagram.swing.UILauncher;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
 /**
- * {@link DataPresenter} for the harness. Every callback is recorded in {@link #getEvents()} so tests can
+ * {@link UILauncher} for the harness. Every callback is recorded in {@link #getEvents()} so tests can
  * assert that the library asked the host to do something. File dialogs can be scripted with
  * {@link #queueFileDialogResult(String)} so tests never block on a modal chooser.
  */
-public class HarnessPresenter implements DataPresenter
+public class HarnessPresenter implements UILauncher
 {
 	public static final String NO_FILE = "\u0000cancel";
 
@@ -91,14 +91,9 @@ public class HarnessPresenter implements DataPresenter
 	}
 
 	@Override
-	public void showTimeSeries(List<String> names) {
-		eventRecord("showTimeSeries " + names);
-	}
-
-	@Override
 	public void launchDialog(Runnable showDialog) {
 		eventRecord("launchDialog");
-		DataPresenter.super.launchDialog(showDialog);
+		UILauncher.super.launchDialog(showDialog);
 	}
 
 	@Override

@@ -8,10 +8,11 @@ import com.mindfusion.pdf.PageSizesEnum;
 
 import hec.hecmath.HecMath;
 
+/**
+ * Data source interface for schematic diagram.
+ */
 public interface SchematicDataSource
 {
-	boolean[] getSelectedStudies();
-
 	boolean getSelectedStudy(int index);
 
 	boolean isDebugging();
@@ -49,4 +50,6 @@ public interface SchematicDataSource
 	PageSizesEnum pageSize();
 
 	void setPageSize(PageSizesEnum pageSize);
+
+	String shapeLibPath();
 }
