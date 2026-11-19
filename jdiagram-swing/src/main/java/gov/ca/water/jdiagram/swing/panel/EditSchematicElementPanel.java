@@ -14,6 +14,11 @@ import com.mindfusion.diagramming.ShapeNode;
 
 public class EditSchematicElementPanel extends JPanel {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
+	private static final String TRIANGLE = "Triangle";
+	private static final String RECTANGLE = "Rectangle";
+	private static final String CIRCLE = "Circle";
+	private static final String ELLIPSE = "Ellipse";
+	private static final String ALTERNATIVE = "Alternative";
 
 	private final JLabel colorLabel;
 	private final JLabel shapeLabel;
@@ -34,9 +39,9 @@ public class EditSchematicElementPanel extends JPanel {
 		add(shapeLabel);
 		shapeBox = new JComboBox();
 		add(shapeBox);
-		shapeBox.addItem("Rectangle");
-		shapeBox.addItem("Circle");
-		shapeBox.addItem("Triangle");
+		shapeBox.addItem(RECTANGLE);
+		shapeBox.addItem(CIRCLE);
+		shapeBox.addItem(TRIANGLE);
 	}
 
 	public void setDiagramItem(DiagramItem item) {
@@ -59,25 +64,27 @@ public class EditSchematicElementPanel extends JPanel {
 		colorBox.setSelectedItem(color);
 	}
 
+	// TODO: Needs investigation as to intended function
 	private void setShapeSelected(Shape shape) {
 		String id = shape.getId();
 		logger.atFinest().log("Shape id: " + id);
-		String shapeName = "Rectangle";
-		if (id.equals("Alternative")) {
-			shapeName.equals("Triangle");
-		} else if (id.equals("Ellipse")) {
-			shapeName.equals("Circle");
+		String shapeName = RECTANGLE;
+		if (id.equals(ALTERNATIVE)) {
+			shapeName.equals(TRIANGLE);
+		} else if (id.equals(ELLIPSE)) {
+			shapeName.equals(CIRCLE);
 		}
 		shapeBox.setSelectedItem(shapeName);
 	}
 
+	// TODO: Needs investigation as to intended function
 	public String getShape() {
 		String shapeName = (String) shapeBox.getSelectedItem();
 		String shapeId = shapeName;
-		if (shapeName.equals("Triangle")) {
-			shapeId = "Alternative";
-		} else if (shapeName.equals("Circle")) {
-			shapeId = "Ellipse";
+		if (shapeName.equals(TRIANGLE)) {
+			shapeId = ALTERNATIVE;
+		} else if (shapeName.equals(CIRCLE)) {
+			shapeId = ELLIPSE;
 		}
 		return shapeId;
 	}

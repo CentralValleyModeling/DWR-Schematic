@@ -17,6 +17,7 @@ import com.mindfusion.diagramming.DiagramView;
 
 /**
  * Panel for displaying a magnified view of a diagram.
+ * Creates a magnified view of the current diagram view by a default factor of 4.
  */
 public final class MagnifierPanel extends JPanel
 {

@@ -35,8 +35,8 @@ public final class DateCombo {
 	private JPanel createControl(JPanel parent) {
 		JPanel container = new JPanel();
 		GridLayout glContainer = new GridLayout(0, 1);
-		glContainer.setHgap(0);
-		glContainer.setVgap(0);
+		glContainer.setHgap(10);
+		glContainer.setVgap(10);
 		container.setLayout(glContainer);
 		container.add(getDateList());
 		parent.add(container);
@@ -64,7 +64,7 @@ public final class DateCombo {
 			} else if (schematicView.getBase().getContext().core().getSelectedIndex() == 0){
 				presenter.launchDialog(() -> {
 					Window window = presenter.getShell(dateList);
-					JFrame parentFrame = window instanceof JFrame ? (JFrame) window : null;
+					JFrame parentFrame = window instanceof JFrame frame ? frame : null;
 					AddTimeWindowDialog dialog = new AddTimeWindowDialog(parentFrame, schematicView.getBase(), getDateList());
 					dialog.openDialog();
 				});

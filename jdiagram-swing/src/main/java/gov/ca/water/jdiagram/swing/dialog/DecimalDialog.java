@@ -18,12 +18,18 @@ public final class DecimalDialog extends JDialog
 {
 	private static String DECIMAL_PLACES = "decimalPlaces";
 	private final SchematicPanel schematic;
-	private final transient UILauncher presenter;
+	private final transient UILauncher launcher;
 
-	public DecimalDialog(JFrame parent, SchematicPanel schematic, UILauncher presenter) {
+	/**
+	 * Creates a new DecimalDialog. Uses JFrame as replacement for Eclipse Shell.
+	 * @param parent the parent frame
+	 * @param schematic the schematic panel
+	 * @param launcher the UI presenter
+	 */
+	public DecimalDialog(JFrame parent, SchematicPanel schematic, UILauncher launcher) {
 		super(parent);
 		this.schematic = schematic;
-		this.presenter = presenter;
+		this.launcher = launcher;
 		setTitle("Set Decimal Places");
 	}
 
@@ -67,8 +73,8 @@ public final class DecimalDialog extends JDialog
 					schematic.refreshValues(1, false);
 				}
 			}
-			if (presenter.mtp() != null){
-				presenter.setMtpDecimalPlaces(numberDecimals);
+			if (launcher.mtp() != null){
+				launcher.setMtpDecimalPlaces(numberDecimals);
 			}
 			frame.dispose();
 		});
