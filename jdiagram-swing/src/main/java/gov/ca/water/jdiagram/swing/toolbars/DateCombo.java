@@ -76,7 +76,7 @@ public final class DateCombo {
 	public void setDateCombo(int startMonth, int startYear, int endMonth, int endYear) {
 		dateList.removeAllItems();
 		procTWFile();
-		for (int i = 0; i < schematicView.getBase().getContext().core().getSchematicTwSelections().size(); i++){
+		for (int i = 0; i < schematicView.getBase().getContext().core().getSchematicTwSelections().size(); i++) {
 			dateList.addItem(schematicView.getBase().getContext().core().getSchematicTwSelections().get(i));
 		}
 		int j = startMonth;

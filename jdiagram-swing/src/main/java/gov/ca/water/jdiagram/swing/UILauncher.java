@@ -35,19 +35,54 @@ public interface UILauncher
 		return component == null ? null : SwingUtilities.getWindowAncestor(component);
 	}
 
+	/**
+	 * Retrieves the MonthlyTablePanel, defined in WRIMS.
+	 * Formerly DssPluginCore.mtp
+	 * @return The MonthlyTablePanel.
+	 */
 	JPanel mtp();
 
+	/**
+	 * Set the number of decimal places used when representing flow values in the MonthlyTablePanel.
+	 * @param numberDecimals The number of decimal places to be set.
+	 */
 	void setMtpDecimalPlaces(int numberDecimals);
 
+	/**
+	 * Shows the DSSMonthlyView, DSSPlotView, and DSSTableView
+	 * Formerly implemented in Schematicbase.createPartControl()
+	 */
 	void showDssView();
 
+	/**
+	 * Open DssCatalogView perspective.
+	 * Formerly implemented in Schematicbase.createPartControl().openDSSPerspective()
+	 */
 	void showDSSPerspective();
 
+	/**
+	 * Launches the font dialog. Formerly launched Eclipse FontDialog as SchematicBase fontAction.
+	 */
 	void launchFontDialog();
 
+	/**
+	 * Launches the file dialog. Formerly launched Eclipse FileDialog as SchematicBase openSchematicAction
+	 * @return The absolute path to the first selected file, or null if none selected.
+	 */
 	String launchFileDialog();
 
+	/**
+	 * Launches the schematic overview panel. Formerly implemented in Schematicbase.createPartControl().
+	 * @param overview The schematic overview panel.
+	 * @param view The diagram view to assign to the overview panel.
+	 * @param container The container panel.
+	 */
 	void launchViewPart(SchematicOverview overview, DiagramView view, JPanel container);
 
+	/**
+	 * Retrieves the toolbar for the schematic.
+	 * Formerly implemented in SchematicEditor.contributeToEditorActionBars()
+	 * @return The toolbar. Formerly returned the Eclipse IToolBarManager.
+	 */
 	JToolBar getToolBar();
 }

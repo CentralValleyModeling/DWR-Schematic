@@ -177,7 +177,6 @@ public final class SampleData
 		link(diagram, sac, jones);
 
 		ShapeNode title = diagram.getFactory().createShapeNode(20, -15, 220, 12);
-		title.setText("jdiagram UI harness - sample schematic");
 		title.setTransparent(true);
 		title.setLocked(true);
 

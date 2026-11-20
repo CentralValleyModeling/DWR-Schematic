@@ -1,10 +1,15 @@
 package gov.ca.water.jdiagram.swing.dialog;
 
-import java.awt.GridLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
@@ -19,6 +24,7 @@ public final class DecimalDialog extends JDialog
 	private static String DECIMAL_PLACES = "decimalPlaces";
 	private final SchematicPanel schematic;
 	private final transient UILauncher launcher;
+	private static final Font FONT = new Font("Arial", Font.PLAIN, 12);
 
 	/**
 	 * Creates a new DecimalDialog. Uses JFrame as replacement for Eclipse Shell.
@@ -38,53 +44,64 @@ public final class DecimalDialog extends JDialog
 		setModal(true);
 		setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		createContents(this);
-		setSize(325, 120);
+		setSize(250, 120);
+		setResizable(false);
 		setLocationRelativeTo(getOwner());
 		setVisible(true);
 	}
 
 	private void createContents(final JDialog frame) {
-		GridLayout layout = new GridLayout();
-		layout.setColumns(14);
-		layout.setVgap(20);
-		layout.setHgap(20);
-		frame.setLayout(layout);
+		JPanel content = new JPanel(new BorderLayout(10, 12));
+		content.setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
 
-		JLabel label = new JLabel();
-		label.setText("Decimal Places:");
-		label.setHorizontalAlignment(SwingConstants.LEFT);
-		frame.add(label);
+		JPanel inputRow = new JPanel(new BorderLayout(8, 0));
+		JLabel label = new JLabel("Decimal Places:");
+		inputRow.add(label, BorderLayout.WEST);
 
-		final JTextField decimalText = new JTextField();
-		frame.add(decimalText);
+		final JTextField decimalText = new JTextField(6);
 		decimalText.setText(String.valueOf(schematic.getBase().getContext().core().getPreferences().getInt(DECIMAL_PLACES, 0)));
 		decimalText.setHorizontalAlignment(SwingConstants.LEFT);
+		decimalText.setFont(FONT);
+		label.setLabelFor(decimalText);
+		label.setFont(FONT);
+		inputRow.add(decimalText, BorderLayout.CENTER);
+		content.add(inputRow, BorderLayout.CENTER);
 
-		JButton ok = new JButton();
-		ok.setText("OK");
-		ok.setHorizontalAlignment(SwingConstants.LEFT);
+		JButton ok = new JButton("OK");
+		ok.setFont(FONT);
 		ok.addActionListener(e -> {
 			final int numberDecimals = Integer.parseInt(decimalText.getText());
 			schematic.getBase().getContext().core().getPreferences().putInt(DECIMAL_PLACES, numberDecimals);
 			if (!schematic.getBase().getContext().dataSource().isDebugging()) {
 				schematic.refreshValues(0, false);
 			} else {
-				if (schematic.getBase().getContext().dataSource().target() != null){
+				if (schematic.getBase().getContext().dataSource().target() != null) {
 					schematic.refreshValues(1, false);
 				}
 			}
-			if (launcher.mtp() != null){
+			if (launcher.mtp() != null) {
 				launcher.setMtpDecimalPlaces(numberDecimals);
 			}
 			frame.dispose();
 		});
-		frame.add(ok);
-
-		JButton cancel = new JButton();
-		cancel.setText("Cancel");
+		JButton cancel = new JButton("Cancel");
+		cancel.setFont(FONT);
 		cancel.addActionListener(e -> frame.dispose());
-		frame.add(cancel);
 
+		// Give both buttons the same width so they line up neatly.
+		Dimension buttonSize = cancel.getPreferredSize();
+		Dimension okSize = ok.getPreferredSize();
+		buttonSize.width = Math.max(buttonSize.width, okSize.width);
+		ok.setPreferredSize(buttonSize);
+		cancel.setPreferredSize(buttonSize);
+
+		JPanel buttons = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 0));
+		buttons.add(ok);
+		buttons.add(cancel);
+		content.add(buttons, BorderLayout.SOUTH);
+
+		frame.setContentPane(content);
+		frame.getRootPane().setDefaultButton(ok);
 		frame.pack();
 	}
 }
