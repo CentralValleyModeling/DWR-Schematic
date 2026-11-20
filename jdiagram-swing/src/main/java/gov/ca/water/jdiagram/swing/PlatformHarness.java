@@ -12,7 +12,7 @@ import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 /**
  * Interface for launching UI components from the host application.
  */
-public interface UILauncher
+public interface PlatformHarness
 {
 	/**
 	 * Runs the supplied action that opens a specified dialog on the host's UI thread.

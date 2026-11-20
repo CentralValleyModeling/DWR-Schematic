@@ -13,7 +13,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import gov.ca.water.jdiagram.swing.UILauncher;
+import gov.ca.water.jdiagram.swing.PlatformHarness;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
 /**
@@ -23,7 +23,7 @@ public final class DecimalDialog extends JDialog
 {
 	private static String DECIMAL_PLACES = "decimalPlaces";
 	private final SchematicPanel schematic;
-	private final transient UILauncher launcher;
+	private final transient PlatformHarness launcher;
 	private static final Font FONT = new Font("Arial", Font.PLAIN, 12);
 
 	/**
@@ -32,7 +32,7 @@ public final class DecimalDialog extends JDialog
 	 * @param schematic the schematic panel
 	 * @param launcher the UI presenter
 	 */
-	public DecimalDialog(JFrame parent, SchematicPanel schematic, UILauncher launcher) {
+	public DecimalDialog(JFrame parent, SchematicPanel schematic, PlatformHarness launcher) {
 		super(parent);
 		this.schematic = schematic;
 		this.launcher = launcher;

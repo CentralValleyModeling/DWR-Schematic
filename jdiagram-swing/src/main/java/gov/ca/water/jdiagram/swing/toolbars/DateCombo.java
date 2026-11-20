@@ -15,7 +15,7 @@ import javax.swing.JPanel;
 
 import com.google.common.flogger.FluentLogger;
 import gov.ca.water.jdiagram.core.utils.TimeOps;
-import gov.ca.water.jdiagram.swing.UILauncher;
+import gov.ca.water.jdiagram.swing.PlatformHarness;
 import gov.ca.water.jdiagram.swing.dialog.AddTimeWindowDialog;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 
@@ -23,11 +23,11 @@ public final class DateCombo {
 	private static final FluentLogger logger = FluentLogger.forEnclosingClass();
 
 	private final SchematicPanel schematicView;
-	private final UILauncher presenter;
+	private final PlatformHarness presenter;
 
 	private JComboBox<String> dateList;
 
-	public DateCombo(SchematicPanel schematicPanel, UILauncher presenter) {
+	public DateCombo(SchematicPanel schematicPanel, PlatformHarness presenter) {
 		this.schematicView = schematicPanel;
 		this.presenter = presenter;
 	}

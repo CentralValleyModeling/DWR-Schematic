@@ -9,7 +9,7 @@ This README documents the initial migration and provides historical references f
 ## UI Test Harness
 
 `jdiagram-swing` has a `harness` source set (not included in the published jar) that runs the Swing UI against
-fake data: an in-memory `SchematicCore`/`SchematicDataSource`, a scripted `UILauncher`, and a small built-in
+fake data: an in-memory `SchematicCore`/`SchematicDataSource`, a scripted `PlatformHarness`, and a small built-in
 sample schematic with synthetic monthly series for four studies.
 
 **Launch it manually** (IntelliJ: use the shared *Harness* run configurations):

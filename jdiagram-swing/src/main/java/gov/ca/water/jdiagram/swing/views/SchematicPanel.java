@@ -48,7 +48,7 @@ import com.mindfusion.drawing.Align;
 import com.mindfusion.drawing.TextFormat;
 import gov.ca.water.jdiagram.core.SchematicLicense;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
-import gov.ca.water.jdiagram.swing.UILauncher;
+import gov.ca.water.jdiagram.swing.PlatformHarness;
 import gov.ca.water.jdiagram.swing.behavior.DiagramPropertiesTableModel;
 import gov.ca.water.jdiagram.swing.behavior.DiagramSelectionProvider;
 import gov.ca.water.jdiagram.swing.behavior.RectangleZoomBehavior;
@@ -73,7 +73,7 @@ public class SchematicPanel extends JComponent
 
 	private DiagramView diagramView;
 
-	private final transient UILauncher presenter;
+	private final transient PlatformHarness presenter;
 
 	private transient Diagram diagram;
 
@@ -133,7 +133,7 @@ public class SchematicPanel extends JComponent
 
 	private static String ISMONTHLYTAF = "ismonthlytaf";
 
-	public SchematicPanel(SchematicPanelBase base, UILauncher presenter) {
+	public SchematicPanel(SchematicPanelBase base, PlatformHarness presenter) {
 		this.base = base;
 		this.presenter = presenter;
 	}
@@ -142,7 +142,7 @@ public class SchematicPanel extends JComponent
 		return base;
 	}
 
-	public UILauncher getDataPresenter() {
+	public PlatformHarness getDataPresenter() {
 		return presenter;
 	}
 

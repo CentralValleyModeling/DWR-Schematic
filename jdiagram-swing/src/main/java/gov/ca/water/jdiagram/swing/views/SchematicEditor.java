@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -68,7 +67,7 @@ import com.mindfusion.drawing.SolidBrush;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
 import gov.ca.water.jdiagram.core.utils.AttributeMapper;
 import gov.ca.water.jdiagram.core.utils.XmlUtilities;
-import gov.ca.water.jdiagram.swing.UILauncher;
+import gov.ca.water.jdiagram.swing.PlatformHarness;
 import gov.ca.water.jdiagram.swing.panel.EditSchematicElementPanel;
 import org.w3c.dom.Document;
 
@@ -129,7 +128,7 @@ public final class SchematicEditor extends SchematicPanel {
 	private transient JMenuItem shrinkToElementsMenuItem;
 	private transient JMenuItem changePointsMenuItem;
 
-	public SchematicEditor(SchematicPanelBase base, UILauncher presenter) {
+	public SchematicEditor(SchematicPanelBase base, PlatformHarness presenter) {
 		super(base, presenter);
 	}
 
@@ -484,7 +483,7 @@ public final class SchematicEditor extends SchematicPanel {
 
 		if (getBase().getContext().core().getDiagram().equals(diagram)){
 			//first add all nodes
-			HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<DiagramNode, DiagramNode>();
+			HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<>();
 			for (DiagramItem itemOriginal : getBase().getContext().core().getDiagramItems()) {
 				if (itemOriginal == null) {
 					continue;
