@@ -59,7 +59,7 @@ public final class DecimalDialog extends JDialog
 		inputRow.add(label, BorderLayout.WEST);
 
 		final JTextField decimalText = new JTextField(6);
-		decimalText.setText(String.valueOf(schematic.getBase().getContext().core().getPreferences().getInt(DECIMAL_PLACES, 0)));
+		decimalText.setText(String.valueOf(schematic.getBase().getContext().dataSource().getPreferences().getInt(DECIMAL_PLACES, 0)));
 		decimalText.setHorizontalAlignment(SwingConstants.LEFT);
 		decimalText.setFont(FONT);
 		label.setLabelFor(decimalText);
@@ -71,7 +71,7 @@ public final class DecimalDialog extends JDialog
 		ok.setFont(FONT);
 		ok.addActionListener(e -> {
 			final int numberDecimals = Integer.parseInt(decimalText.getText());
-			schematic.getBase().getContext().core().getPreferences().putInt(DECIMAL_PLACES, numberDecimals);
+			schematic.getBase().getContext().dataSource().getPreferences().putInt(DECIMAL_PLACES, numberDecimals);
 			if (!schematic.getBase().getContext().dataSource().isDebugging()) {
 				schematic.refreshValues(0, false);
 			} else {

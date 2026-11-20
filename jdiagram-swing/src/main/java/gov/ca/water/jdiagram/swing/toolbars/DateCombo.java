@@ -51,9 +51,9 @@ public final class DateCombo {
 		// Register after populating: JComboBox fires ActionEvents when the first item is added,
 		// which would otherwise pop the "Add time window" dialog on startup.
 		dateList.addActionListener(e -> {
-			schematicView.getBase().getContext().core().updateSelectedIndex(dateList.getSelectedIndex());
-			if (schematicView.getBase().getContext().core().getSelectedIndex() > 0){
-				schematicView.getBase().getContext().core().setSelectedDate((String) dateList.getSelectedItem());
+			schematicView.getBase().getContext().dataSource().updateSelectedIndex(dateList.getSelectedIndex());
+			if (schematicView.getBase().getContext().dataSource().getSelectedIndex() > 0){
+				schematicView.getBase().getContext().dataSource().setSelectedDate((String) dateList.getSelectedItem());
 				if (!schematicView.getBase().getContext().dataSource().isDebugging()) {
 					schematicView.refreshValues(0, true);
 				} else {
@@ -61,7 +61,7 @@ public final class DateCombo {
 						schematicView.refreshValues(1, true);
 					}
 				}
-			} else if (schematicView.getBase().getContext().core().getSelectedIndex() == 0){
+			} else if (schematicView.getBase().getContext().dataSource().getSelectedIndex() == 0){
 				presenter.launchDialog(() -> {
 					Window window = presenter.getShell(dateList);
 					JFrame parentFrame = window instanceof JFrame frame ? frame : null;
@@ -76,8 +76,8 @@ public final class DateCombo {
 	public void setDateCombo(int startMonth, int startYear, int endMonth, int endYear) {
 		dateList.removeAllItems();
 		procTWFile();
-		for (int i = 0; i < schematicView.getBase().getContext().core().getSchematicTwSelections().size(); i++) {
-			dateList.addItem(schematicView.getBase().getContext().core().getSchematicTwSelections().get(i));
+		for (int i = 0; i < schematicView.getBase().getContext().dataSource().getSchematicTwSelections().size(); i++) {
+			dateList.addItem(schematicView.getBase().getContext().dataSource().getSchematicTwSelections().get(i));
 		}
 		int j = startMonth;
 		for (int i = startYear; i <= endYear; i++){
@@ -105,16 +105,16 @@ public final class DateCombo {
 
 	public void procTWFile(){
 		try {
-			File file = new File(schematicView.getBase().getContext().dataSource().getDataDir(), schematicView.getBase().getContext().core().getTwFile());
+			File file = new File(schematicView.getBase().getContext().dataSource().getDataDir(), schematicView.getBase().getContext().dataSource().getTwFile());
 			if (!file.exists()) {
 				file.createNewFile();
 			} else {
-				schematicView.getBase().getContext().core().clearSchematicTwSelections();
-				schematicView.getBase().getContext().core().getSchematicTwSelections().add("Add...");
+				schematicView.getBase().getContext().dataSource().clearSchematicTwSelections();
+				schematicView.getBase().getContext().dataSource().getSchematicTwSelections().add("Add...");
 				try (BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8))) {
 					String line;
 					while((line = br.readLine()) != null) {
-						schematicView.getBase().getContext().core().getSchematicTwSelections().add(line);
+						schematicView.getBase().getContext().dataSource().getSchematicTwSelections().add(line);
 					}
 				}
 			}

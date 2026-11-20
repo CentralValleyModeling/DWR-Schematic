@@ -323,7 +323,7 @@ public final class SchematicEditor extends SchematicPanel {
 			try {
 				saveAttributesTo(fileToSave);
 			} catch (Exception ex) {
-				getBase().getContext().core().reportError(ex);
+				getBase().getContext().dataSource().reportError(ex);
 			}
 		});
 
@@ -332,7 +332,7 @@ public final class SchematicEditor extends SchematicPanel {
 			try {
 				loadAttributesFrom(fileToImport);
 			} catch (Exception ex) {
-				getBase().getContext().core().reportError(ex);
+				getBase().getContext().dataSource().reportError(ex);
 			}
 		});
 
@@ -417,20 +417,20 @@ public final class SchematicEditor extends SchematicPanel {
 		try {
 			diagramView.copyToClipboard(true);
 		} catch (IOException | XmlException e) {
-			getBase().getContext().core().reportError(e);
+			getBase().getContext().dataSource().reportError(e);
 		}
-		getBase().getContext().core().setDiagram(d);
+		getBase().getContext().dataSource().setDiagram(d);
 	}
 
 	public void onCopy(Diagram d) {
-		getBase().getContext().core().setDiagramItems(new ArrayList<>());
+		getBase().getContext().dataSource().setDiagramItems(new ArrayList<>());
 		HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<DiagramNode, DiagramNode>();
 		if (!(d.getSelection().getNodes().isEmpty())) {
 			DiagramNodeList nodes = d.getSelection().getNodes();
 			for (DiagramNode node : nodes) {
 				if (node instanceof ShapeNode snode) {
 					ShapeNode clone = (ShapeNode) snode.clone(true);
-					getBase().getContext().core().getDiagramItems().add(clone);
+					getBase().getContext().dataSource().getDiagramItems().add(clone);
 					selectedToAddedMap.put(snode, clone);
 				}
 			}
@@ -440,7 +440,7 @@ public final class SchematicEditor extends SchematicPanel {
 			for (DiagramLink link : links) {
 				if (link instanceof DiagramLink) {
 					DiagramLink linkClone = (DiagramLink) link.clone(true);
-					getBase().getContext().core().getDiagramItems().add(linkClone);
+					getBase().getContext().dataSource().getDiagramItems().add(linkClone);
 					// connect it up if origin or destination nodes were
 					// selected and
 					// copied over
@@ -464,8 +464,8 @@ public final class SchematicEditor extends SchematicPanel {
 	}
 
 	public void onPaste() {
-		if (lastMouseClickedPosition == null || getBase().getContext().core().getDiagramItems() == null
-				|| getBase().getContext().core().getDiagramItems().isEmpty()) {
+		if (lastMouseClickedPosition == null || getBase().getContext().dataSource().getDiagramItems() == null
+				|| getBase().getContext().dataSource().getDiagramItems().isEmpty()) {
 			return;
 		}
 
@@ -476,15 +476,15 @@ public final class SchematicEditor extends SchematicPanel {
 				"PasteALot");
 		diagram.getLinkRouter().Suspend();
 
-		DiagramItem diagramItem = getBase().getContext().core().getDiagramItems().getFirst();
+		DiagramItem diagramItem = getBase().getContext().dataSource().getDiagramItems().getFirst();
 		java.awt.geom.Rectangle2D.Float bounds = diagramItem.getBounds();
 		float delX = (float) lastMouseClickedPosition.getX() - bounds.x;
 		float delY = (float) lastMouseClickedPosition.getY() - bounds.y;
 
-		if (getBase().getContext().core().getDiagram().equals(diagram)){
+		if (getBase().getContext().dataSource().getDiagram().equals(diagram)){
 			//first add all nodes
 			HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<>();
-			for (DiagramItem itemOriginal : getBase().getContext().core().getDiagramItems()) {
+			for (DiagramItem itemOriginal : getBase().getContext().dataSource().getDiagramItems()) {
 				if (itemOriginal == null) {
 					continue;
 				}
@@ -502,7 +502,7 @@ public final class SchematicEditor extends SchematicPanel {
 				//FIXME: alignTo grid
 			}
 			//then add links connecting them to nodes if selected and added
-			for (DiagramItem itemOriginal : getBase().getContext().core().getDiagramItems()) {
+			for (DiagramItem itemOriginal : getBase().getContext().dataSource().getDiagramItems()) {
 				if (itemOriginal == null) {
 					continue;
 				}
@@ -545,7 +545,7 @@ public final class SchematicEditor extends SchematicPanel {
 			try {
 				diagramView.pasteFromClipboard(delX, delY, false);
 			} catch (IOException | XmlException e) {
-				getBase().getContext().core().reportError(e);
+				getBase().getContext().dataSource().reportError(e);
 			}
 		}
 	}

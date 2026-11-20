@@ -73,9 +73,9 @@ class SchematicEditorUiTest extends SchematicViewUiTest
 		});
 		click("Copy");
 		flushEdt();
-		assertEquals(1, harness.getCore().getDiagramItems().size(), "one node copied");
-		assertInstanceOf(ShapeNode.class, harness.getCore().getDiagramItems().get(0));
-		assertSame(schematic().getDiagram(), harness.getCore().getDiagram());
+		assertEquals(1, harness.getDataSource().getDiagramItems().size(), "one node copied");
+		assertInstanceOf(ShapeNode.class, harness.getDataSource().getDiagramItems().getFirst());
+		assertSame(schematic().getDiagram(), harness.getDataSource().getDiagram());
 	}
 
 	@Test

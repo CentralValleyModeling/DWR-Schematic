@@ -124,7 +124,7 @@ class SchematicViewUiTest
 		Thread.setDefaultUncaughtExceptionHandler(previousHandler);
 		if (harness != null) {
 			assertNoUncaught(uncaught);
-			assertTrue(harness.getCore().getErrors().isEmpty(), () -> "Host reported errors: " + harness.getCore().getErrors());
+			assertTrue(harness.getDataSource().getErrors().isEmpty(), () -> "Host reported errors: " + harness.getDataSource().getErrors());
 		}
 	}
 
@@ -180,7 +180,7 @@ class SchematicViewUiTest
 		int nodes = onEdt(() -> schematic().getDiagram().getNodes().size());
 		assertTrue(nodes >= 10, "expected sample nodes, got " + nodes);
 		if (!editor()) {
-			List<String> names = harness.getCore().getAllSchematicVariableNames();
+			List<String> names = harness.getDataSource().getAllSchematicVariableNames();
 			assertTrue(names.contains("C_SAC041"), () -> "collectAllSchematicVariables gave " + names);
 		}
 	}
@@ -201,7 +201,7 @@ class SchematicViewUiTest
 	@Test
 	void selectingMonthWritesValuesForEachSelectedStudy() throws Exception {
 		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
-		assertEquals(FIRST_MONTH, harness.getCore().getSelectedDate());
+		assertEquals(FIRST_MONTH, harness.getDataSource().getSelectedDate());
 
 		ShapeNode sac = onEdt(() -> node(schematic().getDiagram(), "C_SAC041"));
 		String alt0 = format(SampleData.expectedValue("c_sac041", 0, 0), 0, "CFS");
@@ -280,7 +280,7 @@ class SchematicViewUiTest
 		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
 		click("Forward");
 		assertEquals(SECOND_MONTH, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
-		assertEquals(SECOND_MONTH, harness.getCore().getSelectedDate());
+		assertEquals(SECOND_MONTH, harness.getDataSource().getSelectedDate());
 		click("Backward");
 		assertEquals(FIRST_MONTH, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
 	}
@@ -363,10 +363,10 @@ class SchematicViewUiTest
 		});
 		String added = "OCT1922 - SEP2003";
 		waitUntil("dialog closed", () -> showingDialog("Add Time Window").isEmpty());
-		assertTrue(harness.getCore().getSchematicTwSelections().contains(added),
-				() -> "time windows: " + harness.getCore().getSchematicTwSelections());
+		assertTrue(harness.getDataSource().getSchematicTwSelections().contains(added),
+				() -> "time windows: " + harness.getDataSource().getSchematicTwSelections());
 		assertEquals(added, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
-		String file = Files.readString(tempDir.resolve(MockSchematicCore.TW_FILE), StandardCharsets.UTF_8);
+		String file = Files.readString(tempDir.resolve(MockSchematicDataSource.TW_FILE), StandardCharsets.UTF_8);
 		assertTrue(file.contains(added), "time-window file should contain the new window: " + file);
 	}
 

@@ -14,7 +14,7 @@ import com.mindfusion.diagramming.Diagram;
 import com.mindfusion.diagramming.export.PdfExporter;
 import com.mindfusion.pdf.AutoScale;
 import com.mindfusion.pdf.PageSizesEnum;
-import gov.ca.water.jdiagram.core.interfaces.SchematicDataSource;
+import gov.ca.water.jdiagram.core.SchematicDataSource;
 
 public final class PDFOptionDialog extends JDialog
 {

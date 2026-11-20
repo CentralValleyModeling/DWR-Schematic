@@ -56,7 +56,6 @@ public final class HarnessFrame extends JFrame
 
 	private final File workDir;
 	private final SampleData sampleData = new SampleData();
-	private final transient MockSchematicCore host;
 	private final transient MockSchematicDataSource dataSource;
 	private final transient SchematicContext context;
 	private final boolean editor;
@@ -70,13 +69,12 @@ public final class HarnessFrame extends JFrame
 		super(editor ? "jdiagram harness - SchematicEditor" : "jdiagram harness - SchematicView");
 		this.editor = editor;
 		this.workDir = workDir;
-		this.host = new MockSchematicCore(sampleData, preferences);
-		this.dataSource = new MockSchematicDataSource(workDir, host);
-		this.context = new SchematicContext(host, dataSource);
+		this.dataSource = new MockSchematicDataSource(workDir, sampleData, preferences);
+		this.context = new SchematicContext(dataSource);
 
 		log.setEditable(false);
 		log.setName("eventLog");
-		host.setEventSink(this::appendLog);
+		dataSource.setEventSink(this::appendLog);
 		presenter.setEventSink(this::appendLog);
 		presenter.setOverviewSink(this::showOverview);
 		presenter.setDialogParent(this);
@@ -133,7 +131,7 @@ public final class HarnessFrame extends JFrame
 	/**
 	 * Creates the harness. Call on the EDT.
 	 *
-	 * @param editor      true for {@link SchematicEditor}, false for the read-only {@link SchematicView}
+	 * @param editor      true for {@link SchematicEditor}, false for the read-only {@link SchematicPanel}
 	 * @param workDir     scratch directory for the time-window file and sample XML
 	 * @param preferences preference node backing {@code SchematicHost.getPreferences()}
 	 */
@@ -148,7 +146,7 @@ public final class HarnessFrame extends JFrame
 	/** Writes the time-window file read by DateCombo and a sample schematic for the Open action. */
 	public static void prepareWorkDir(File workDir) throws IOException {
 		Files.createDirectories(workDir.toPath());
-		File tw = new File(workDir, MockSchematicCore.TW_FILE);
+		File tw = new File(workDir, MockSchematicDataSource.TW_FILE);
 		if (!tw.exists()) {
 			Files.writeString(tw.toPath(), SAMPLE_TIME_WINDOW + System.lineSeparator(), StandardCharsets.UTF_8);
 		}
@@ -180,7 +178,7 @@ public final class HarnessFrame extends JFrame
 
 	/** Re-runs the value refresh for the currently selected date. */
 	public void refreshValues() {
-		host.clearLongTermAverages();
+		dataSource.clearLongTermAverages();
 		schematic.refreshValues(dataSource.isDebugging() ? 1 : 0, true);
 	}
 
@@ -208,7 +206,7 @@ public final class HarnessFrame extends JFrame
 		panel.add(mode);
 
 		JPanel studies = titled("Studies", new GridLayout(0, 2));
-		for (int i = 0; i < MockSchematicCore.STUDY_COUNT; i++) {
+		for (int i = 0; i < MockSchematicDataSource.STUDY_COUNT; i++) {
 			final int index = i;
 			JCheckBox box = new JCheckBox("Alt " + i, dataSource.getSelectedStudy(i));
 			box.addActionListener(e -> { dataSource.setSelectedStudy(index, box.isSelected()); refreshValues(); });
@@ -311,10 +309,6 @@ public final class HarnessFrame extends JFrame
 
 	public SampleData getSampleData() {
 		return sampleData;
-	}
-
-	public MockSchematicCore getCore() {
-		return host;
 	}
 
 	public MockSchematicDataSource getDataSource() {

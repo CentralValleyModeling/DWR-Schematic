@@ -86,10 +86,10 @@ public class AddTimeWindowDialog extends JDialog
 		ok.setText("OK");
 		ok.addActionListener(e -> {
 			int index = validateTW();
-			if (index == _schematicPanelBase.getContext().core().getSchematicTwSelections().size()) {
+			if (index == _schematicPanelBase.getContext().dataSource().getSchematicTwSelections().size()) {
 				// Register the window with the host before selecting it: selecting fires the refresh, which
 				// looks the date up in getSchematicTwSelections() to decide whether it is a time window
-				_schematicPanelBase.getContext().core().getSchematicTwSelections().add(index, newTW);
+				_schematicPanelBase.getContext().dataSource().getSchematicTwSelections().add(index, newTW);
 				saveTWFile();
 				dateList.insertItemAt(newTW, index);
 				dateList.setSelectedIndex(index);
@@ -116,7 +116,7 @@ public class AddTimeWindowDialog extends JDialog
 		} else {
 			// getSelectedItem(), not getName(): getName() is the Swing component name (null here)
 			newTW = month1.getSelectedItem() + String.valueOf(startyear) + " - " + month2.getSelectedItem() + endyear;
-			int size = _schematicPanelBase.getContext().core().getSchematicTwSelections().size();
+			int size = _schematicPanelBase.getContext().dataSource().getSchematicTwSelections().size();
 			int index = size;
 			for (int i = 0; i < index; i++){
 				if (dateList.getItemAt(i).equals(newTW)){
@@ -128,19 +128,19 @@ public class AddTimeWindowDialog extends JDialog
 	}
 
 	public void showWarning() {
-		_schematicPanelBase.getContext().core().showWarning("Start date should be earlier than ending date");
+		_schematicPanelBase.getContext().dataSource().showWarning("Start date should be earlier than ending date");
 	}
 
 	public void saveTWFile(){
 		try {
-			File file = new File(_schematicPanelBase.getContext().dataSource().getDataDir(), _schematicPanelBase.getContext().core().getTwFile());
+			File file = new File(_schematicPanelBase.getContext().dataSource().getDataDir(), _schematicPanelBase.getContext().dataSource().getTwFile());
 			if (!file.exists()){
 				file.createNewFile();
 			}
 			try (PrintWriter out = new PrintWriter(new FileWriter(file, StandardCharsets.UTF_8))) {
-				int size = _schematicPanelBase.getContext().core().getSchematicTwSelections().size();
+				int size = _schematicPanelBase.getContext().dataSource().getSchematicTwSelections().size();
 				for (int i = 1; i < size; i++) {
-					out.println(_schematicPanelBase.getContext().core().getSchematicTwSelections().get(i));
+					out.println(_schematicPanelBase.getContext().dataSource().getSchematicTwSelections().get(i));
 				}
 			}
 		} catch (IOException e) {
