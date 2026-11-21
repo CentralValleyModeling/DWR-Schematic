@@ -15,6 +15,7 @@ import com.mindfusion.diagramming.Shape;
 import com.mindfusion.diagramming.ShapeNode;
 import com.mindfusion.diagramming.XmlException;
 import com.mindfusion.drawing.SolidBrush;
+import gov.ca.water.jdiagram.core.SchematicContext;
 
 import hec.heclib.util.HecTime;
 import hec.hecmath.HecMath;
@@ -66,7 +67,7 @@ public final class SampleData
 
 	/** Units of the raw series. */
 	public static String nativeUnits(String name) {
-		return isStorage(name) ? MockSchematicDataSource.TAF : MockSchematicDataSource.CFS;
+		return isStorage(name) ? SchematicContext.TAF : SchematicContext.CFS;
 	}
 
 	/**
@@ -76,7 +77,7 @@ public final class SampleData
 	public Map<String, String> displayUnits(boolean cfsSelected) {
 		Map<String, String> units = new LinkedHashMap<>();
 		for (String name : templates.keySet()) {
-			units.put(name, isStorage(name) || !cfsSelected ? MockSchematicDataSource.TAF : MockSchematicDataSource.CFS);
+			units.put(name, isStorage(name) || !cfsSelected ? SchematicContext.TAF : SchematicContext.CFS);
 		}
 		return units;
 	}

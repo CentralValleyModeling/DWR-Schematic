@@ -24,6 +24,7 @@ import javax.swing.JToolBar;
 import com.mindfusion.diagramming.Behavior;
 import com.mindfusion.diagramming.DiagramView;
 import com.mindfusion.diagramming.ShapeNode;
+import gov.ca.water.jdiagram.core.SchematicContext;
 import gov.ca.water.jdiagram.swing.toolbars.SearchText;
 import gov.ca.water.jdiagram.swing.views.SchematicPanel;
 import org.junit.jupiter.api.AfterEach;
@@ -180,7 +181,7 @@ class SchematicViewUiTest
 		int nodes = onEdt(() -> schematic().getDiagram().getNodes().size());
 		assertTrue(nodes >= 10, "expected sample nodes, got " + nodes);
 		if (!editor()) {
-			List<String> names = harness.getDataSource().getAllSchematicVariableNames();
+			List<String> names = harness.getContext().getAllSchematicVariableNames();
 			assertTrue(names.contains("C_SAC041"), () -> "collectAllSchematicVariables gave " + names);
 		}
 	}
@@ -201,7 +202,7 @@ class SchematicViewUiTest
 	@Test
 	void selectingMonthWritesValuesForEachSelectedStudy() throws Exception {
 		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
-		assertEquals(FIRST_MONTH, harness.getDataSource().getSelectedDate());
+		assertEquals(FIRST_MONTH, harness.getContext().getSelectedDateOption());
 
 		ShapeNode sac = onEdt(() -> node(schematic().getDiagram(), "C_SAC041"));
 		String alt0 = format(SampleData.expectedValue("c_sac041", 0, 0), 0, "CFS");
@@ -228,7 +229,7 @@ class SchematicViewUiTest
 				.findFirst()
 				.orElseThrow(() -> new AssertionError("No Alt 1 checkbox"))
 				.doClick());
-		assertFalse(harness.getDataSource().getSelectedStudy(1));
+		assertFalse(harness.getContext().getSelectedStudy(1));
 
 		waitForValue(sac, 1, "");
 		waitForValue(sac, 0, alt0);
@@ -236,7 +237,7 @@ class SchematicViewUiTest
 
 	@Test
 	void diffModeShowsAltMinusBase() throws Exception {
-		harness.getDataSource().setMode(MockSchematicDataSource.DIFF);
+		harness.getContext().setMode(SchematicContext.DIFF);
 		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
 
 		ShapeNode banks = onEdt(() -> node(schematic().getDiagram(), "D_BANKS"));
@@ -280,7 +281,7 @@ class SchematicViewUiTest
 		runOnEdt(() -> harness.selectDate(FIRST_MONTH));
 		click("Forward");
 		assertEquals(SECOND_MONTH, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
-		assertEquals(SECOND_MONTH, harness.getDataSource().getSelectedDate());
+		assertEquals(SECOND_MONTH, harness.getContext().getSelectedDateOption());
 		click("Backward");
 		assertEquals(FIRST_MONTH, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
 	}
@@ -304,26 +305,26 @@ class SchematicViewUiTest
 	@Test
 	void zoomToRectangleTogglesCustomBehavior() throws Exception {
 		click("Zoom to Rectangular");
-		assertTrue(harness.getDataSource().zoomToRect());
+		assertTrue(harness.getContext().zoomToRect());
 		assertEquals(Behavior.Custom, onEdt(() -> schematic().getDiagramView().getBehavior()));
 		click("Zoom to Rectangular");
-		assertFalse(harness.getDataSource().zoomToRect());
+		assertFalse(harness.getContext().zoomToRect());
 		assertNotEquals(Behavior.Custom, onEdt(() -> schematic().getDiagramView().getBehavior()));
 	}
 
 	@Test
 	void magnifierToggles() throws Exception {
 		click("Magnifier");
-		assertTrue(harness.getDataSource().showMagnifier());
+		assertTrue(harness.getContext().showMagnifier());
 		click("Magnifier");
-		assertFalse(harness.getDataSource().showMagnifier());
+		assertFalse(harness.getContext().showMagnifier());
 	}
 
 	@Test
 	void tafTypeTogglesMonthlyFlagAndPreference() throws Exception {
-		boolean before = harness.getDataSource().isTAFMonthly();
+		boolean before = harness.getContext().isTAFMonthly();
 		click("TAF Type");
-		waitUntil("TAF monthly flag flipped", () -> harness.getDataSource().isTAFMonthly() != before);
+		waitUntil("TAF monthly flag flipped", () -> harness.getContext().isTAFMonthly() != before);
 		assertEquals(!before, prefs.getBoolean("ismonthlytaf", before));
 	}
 
@@ -363,8 +364,8 @@ class SchematicViewUiTest
 		});
 		String added = "OCT1922 - SEP2003";
 		waitUntil("dialog closed", () -> showingDialog("Add Time Window").isEmpty());
-		assertTrue(harness.getDataSource().getSchematicTwSelections().contains(added),
-				() -> "time windows: " + harness.getDataSource().getSchematicTwSelections());
+		assertTrue(harness.getContext().getSchematicTwSelections().contains(added),
+				() -> "time windows: " + harness.getContext().getSchematicTwSelections());
 		assertEquals(added, onEdt(() -> schematic().getDateCombo().getDateList().getSelectedItem()));
 		String file = Files.readString(tempDir.resolve(MockSchematicDataSource.TW_FILE), StandardCharsets.UTF_8);
 		assertTrue(file.contains(added), "time-window file should contain the new window: " + file);

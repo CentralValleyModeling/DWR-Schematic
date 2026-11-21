@@ -14,12 +14,12 @@ import com.mindfusion.diagramming.Diagram;
 import com.mindfusion.diagramming.export.PdfExporter;
 import com.mindfusion.pdf.AutoScale;
 import com.mindfusion.pdf.PageSizesEnum;
-import gov.ca.water.jdiagram.core.SchematicDataSource;
+import gov.ca.water.jdiagram.core.SchematicContext;
 
 public final class PDFOptionDialog extends JDialog
 {
 	private final String filename;
-	private final transient SchematicDataSource dataSource;
+	private final transient SchematicContext context;
 	private final transient Diagram diagram;
 	private final String[] pageSizeNames = {"A0",
 			"A1",
@@ -52,11 +52,11 @@ public final class PDFOptionDialog extends JDialog
 			"Note"};
 	private final Map<String, PageSizesEnum> pageSizeMap = new HashMap<>();
 
-	public PDFOptionDialog(JFrame parent, String filename, Diagram diagram, SchematicDataSource dataSource) {
+	public PDFOptionDialog(JFrame parent, String filename, Diagram diagram, SchematicContext context) {
 		super(parent);
 		this.filename = filename;
 		this.diagram = diagram;
-		this.dataSource = dataSource;
+		this.context = context;
 		setTitle("PDF Options");
 
 		pageSizeMap.put("A0", PageSizesEnum.A0);
@@ -127,9 +127,9 @@ public final class PDFOptionDialog extends JDialog
 		ok.setText("OK");
 		ok.addActionListener(e -> {
 			PageSizesEnum val = pageSizeMap.get(pageSize.getSelectedItem());
-			dataSource.setPageSize(val);
+			context.setPageSize(val);
 			PdfExporter pdfExp = new PdfExporter();
-			pdfExp.setPageSize(dataSource.pageSize());
+			pdfExp.setPageSize(context.pageSize());
 			pdfExp.setAutoScale(AutoScale.FitToPage);
 			pdfExp.export(diagram, filename);
 			frame.dispose();

@@ -117,6 +117,10 @@ public final class HarnessFrame extends JFrame
 		});
 	}
 
+	public SchematicContext getContext() {
+		return context;
+	}
+
 	/** Zooms so the whole diagram is inside the visible area. Call on the EDT after the window is shown. */
 	public void fitDiagramToView() {
 		schematic.getDiagramView().zoomToFit();
@@ -193,23 +197,23 @@ public final class HarnessFrame extends JFrame
 		ButtonGroup unitsGroup = new ButtonGroup();
 		unitsGroup.add(cfs);
 		unitsGroup.add(taf);
-		cfs.addActionListener(e -> { dataSource.setUnits(MockSchematicDataSource.CFS); refreshValues(); });
-		taf.addActionListener(e -> { dataSource.setUnits(MockSchematicDataSource.TAF); refreshValues(); });
+		cfs.addActionListener(e -> { context.setUnits(SchematicContext.CFS); refreshValues(); });
+		taf.addActionListener(e -> { context.setUnits(SchematicContext.TAF); refreshValues(); });
 		units.add(cfs);
 		units.add(taf);
 		panel.add(units);
 
 		JPanel mode = titled("Mode", new FlowLayout(FlowLayout.LEFT));
-		JComboBox<String> modeBox = new JComboBox<>(new String[]{MockSchematicDataSource.BASE, MockSchematicDataSource.DIFF});
-		modeBox.addActionListener(e -> { dataSource.setMode((String) modeBox.getSelectedItem()); refreshValues(); });
+		JComboBox<String> modeBox = new JComboBox<>(new String[]{SchematicContext.BASE, SchematicContext.DIFF});
+		modeBox.addActionListener(e -> { context.setMode((String) modeBox.getSelectedItem()); refreshValues(); });
 		mode.add(modeBox);
 		panel.add(mode);
 
 		JPanel studies = titled("Studies", new GridLayout(0, 2));
 		for (int i = 0; i < MockSchematicDataSource.STUDY_COUNT; i++) {
 			final int index = i;
-			JCheckBox box = new JCheckBox("Alt " + i, dataSource.getSelectedStudy(i));
-			box.addActionListener(e -> { dataSource.setSelectedStudy(index, box.isSelected()); refreshValues(); });
+			JCheckBox box = new JCheckBox("Alt " + i, context.getSelectedStudy(i));
+			box.addActionListener(e -> { context.setSelectedStudy(index, box.isSelected()); refreshValues(); });
 			studies.add(box);
 		}
 		panel.add(studies);

@@ -64,6 +64,7 @@ import com.mindfusion.drawing.DashStyle;
 import com.mindfusion.drawing.Pen;
 import com.mindfusion.drawing.PointList;
 import com.mindfusion.drawing.SolidBrush;
+import gov.ca.water.jdiagram.core.SchematicContext;
 import gov.ca.water.jdiagram.core.SchematicPanelBase;
 import gov.ca.water.jdiagram.core.utils.AttributeMapper;
 import gov.ca.water.jdiagram.core.utils.XmlUtilities;
@@ -323,7 +324,7 @@ public final class SchematicEditor extends SchematicPanel {
 			try {
 				saveAttributesTo(fileToSave);
 			} catch (Exception ex) {
-				getBase().getContext().dataSource().reportError(ex);
+				getBase().getContext().getDataSource().reportError(ex);
 			}
 		});
 
@@ -332,7 +333,7 @@ public final class SchematicEditor extends SchematicPanel {
 			try {
 				loadAttributesFrom(fileToImport);
 			} catch (Exception ex) {
-				getBase().getContext().dataSource().reportError(ex);
+				getBase().getContext().getDataSource().reportError(ex);
 			}
 		});
 
@@ -417,20 +418,20 @@ public final class SchematicEditor extends SchematicPanel {
 		try {
 			diagramView.copyToClipboard(true);
 		} catch (IOException | XmlException e) {
-			getBase().getContext().dataSource().reportError(e);
+			getBase().getContext().getDataSource().reportError(e);
 		}
-		getBase().getContext().dataSource().setDiagram(d);
+		SchematicContext.setDiagram(d);
 	}
 
 	public void onCopy(Diagram d) {
-		getBase().getContext().dataSource().setDiagramItems(new ArrayList<>());
+		getBase().getContext().setDiagramItems(new ArrayList<>());
 		HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<DiagramNode, DiagramNode>();
 		if (!(d.getSelection().getNodes().isEmpty())) {
 			DiagramNodeList nodes = d.getSelection().getNodes();
 			for (DiagramNode node : nodes) {
 				if (node instanceof ShapeNode snode) {
 					ShapeNode clone = (ShapeNode) snode.clone(true);
-					getBase().getContext().dataSource().getDiagramItems().add(clone);
+					getBase().getContext().getDiagramItems().add(clone);
 					selectedToAddedMap.put(snode, clone);
 				}
 			}
@@ -440,7 +441,7 @@ public final class SchematicEditor extends SchematicPanel {
 			for (DiagramLink link : links) {
 				if (link instanceof DiagramLink) {
 					DiagramLink linkClone = (DiagramLink) link.clone(true);
-					getBase().getContext().dataSource().getDiagramItems().add(linkClone);
+					getBase().getContext().getDiagramItems().add(linkClone);
 					// connect it up if origin or destination nodes were
 					// selected and
 					// copied over
@@ -464,8 +465,8 @@ public final class SchematicEditor extends SchematicPanel {
 	}
 
 	public void onPaste() {
-		if (lastMouseClickedPosition == null || getBase().getContext().dataSource().getDiagramItems() == null
-				|| getBase().getContext().dataSource().getDiagramItems().isEmpty()) {
+		if (lastMouseClickedPosition == null || getBase().getContext().getDiagramItems() == null
+				|| getBase().getContext().getDiagramItems().isEmpty()) {
 			return;
 		}
 
@@ -476,15 +477,15 @@ public final class SchematicEditor extends SchematicPanel {
 				"PasteALot");
 		diagram.getLinkRouter().Suspend();
 
-		DiagramItem diagramItem = getBase().getContext().dataSource().getDiagramItems().getFirst();
+		DiagramItem diagramItem = getBase().getContext().getDiagramItems().getFirst();
 		java.awt.geom.Rectangle2D.Float bounds = diagramItem.getBounds();
 		float delX = (float) lastMouseClickedPosition.getX() - bounds.x;
 		float delY = (float) lastMouseClickedPosition.getY() - bounds.y;
 
-		if (getBase().getContext().dataSource().getDiagram().equals(diagram)){
+		if (SchematicContext.getDiagram().equals(diagram)){
 			//first add all nodes
 			HashMap<DiagramNode, DiagramNode> selectedToAddedMap = new HashMap<>();
-			for (DiagramItem itemOriginal : getBase().getContext().dataSource().getDiagramItems()) {
+			for (DiagramItem itemOriginal : getBase().getContext().getDiagramItems()) {
 				if (itemOriginal == null) {
 					continue;
 				}
@@ -502,7 +503,7 @@ public final class SchematicEditor extends SchematicPanel {
 				//FIXME: alignTo grid
 			}
 			//then add links connecting them to nodes if selected and added
-			for (DiagramItem itemOriginal : getBase().getContext().dataSource().getDiagramItems()) {
+			for (DiagramItem itemOriginal : getBase().getContext().getDiagramItems()) {
 				if (itemOriginal == null) {
 					continue;
 				}
@@ -545,7 +546,7 @@ public final class SchematicEditor extends SchematicPanel {
 			try {
 				diagramView.pasteFromClipboard(delX, delY, false);
 			} catch (IOException | XmlException e) {
-				getBase().getContext().dataSource().reportError(e);
+				getBase().getContext().getDataSource().reportError(e);
 			}
 		}
 	}
@@ -775,7 +776,7 @@ public final class SchematicEditor extends SchematicPanel {
 	}
 
 	public void addToShapeLibrary() throws Exception {
-		String filename = getBase().getContext().dataSource().shapeLibPath();
+		String filename = getBase().getContext().getDataSource().shapeLibPath();
 		if (clickedItem instanceof ShapeNode snode) {
 			Shape s = snode.getShape();
 			Document doc = XmlUtilities.newDocument();
