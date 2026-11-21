@@ -6,6 +6,34 @@ JDiagram was extracted from the WRIMS GUI repository into a standalone repositor
 
 This README documents the initial migration and provides historical references for future developers.
 
+## UI Test Harness
+
+`jdiagram-swing` has a `harness` source set (not included in the published jar) that runs the Swing UI against
+fake data: an in-memory `SchematicCore`/`SchematicDataSource`, a scripted `PlatformHarness`, and a small built-in
+sample schematic with synthetic monthly series for four studies.
+
+**Launch it manually** (IntelliJ: use the shared *Harness* run configurations):
+
+```
+gradlew :jdiagram-swing:runHarness                              # SchematicView (read-only)
+gradlew :jdiagram-swing:runHarness -PharnessArgs="--editor"     # SchematicEditor
+gradlew :jdiagram-swing:runHarness -PharnessArgs="--dir C:/temp/harness"
+```
+
+The side panel has controls for units, Base/Diff mode, selected studies and debug flags, plus Overview,
+Properties and an event log of every host/presenter callback. Add `-PmindfusionLicenseKey=...` to run licensed.
+
+**Run the automated UI tests** (open real windows, so they need a desktop session; they are tagged `ui` and
+excluded from `gradlew test` and CI):
+
+```
+gradlew :jdiagram-swing:uiTest
+```
+
+`SchematicViewUiTest` covers the toolbar, date selection and value labels, diff mode, decimals, long-term
+averages, zoom/magnifier, search, selection/properties and open/save. `SchematicEditorUiTest` re-runs all of those
+against `SchematicEditor` and adds editor checks (toolbar, edit setup, copy, align, delete/undo).
+
 ## Migration History
 
 ### October 29, 2026 — Initial Repository Extraction
