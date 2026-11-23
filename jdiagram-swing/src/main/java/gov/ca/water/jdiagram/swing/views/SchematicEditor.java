@@ -25,7 +25,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.JToolBar;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
@@ -71,6 +70,8 @@ import gov.ca.water.jdiagram.core.utils.XmlUtilities;
 import gov.ca.water.jdiagram.swing.PlatformHarness;
 import gov.ca.water.jdiagram.swing.panel.EditSchematicElementPanel;
 import org.w3c.dom.Document;
+
+import gov.ca.water.jdiagram.swing.toolbars.ToolBarContributor;
 
 import static gov.ca.water.jdiagram.swing.utils.ActionHelper.buildAction;
 import static gov.ca.water.jdiagram.swing.utils.ActionHelper.icon;
@@ -369,21 +370,22 @@ public final class SchematicEditor extends SchematicPanel {
 	}
 
 	private void contributeToEditorActionBars() {
-		fillEditorToolBar(getDataPresenter().getToolBar());
+		fillEditorToolBar(getDataPresenter().getToolBarContributor());
 	}
 
-	private void fillEditorToolBar(JToolBar manager) {
-		manager.add(importAction);
-		manager.add(exportAction);
-		manager.add(undoAction);
-		manager.add(redoAction);
-		manager.add(copyAction);
-		manager.add(pasteAction);
-		manager.add(verticalAlignAction);
-		manager.add(horizontalAlignAction);
-		if (dateCombo != null) {
-			manager.remove(dateCombo.getDateList());
-		}
+	/**
+	 * Adds the editor actions. The date combo is already placed by {@link #fillLocalToolBar(ToolBarContributor)}.
+	 */
+	public void fillEditorToolBar(ToolBarContributor toolBar) {
+		toolBar.addAction(importAction);
+		toolBar.addAction(exportAction);
+		toolBar.addAction(undoAction);
+		toolBar.addAction(redoAction);
+		toolBar.addAction(copyAction);
+		toolBar.addAction(pasteAction);
+		toolBar.addAction(verticalAlignAction);
+		toolBar.addAction(horizontalAlignAction);
+		toolBar.update();
 	}
 
 	public void onDelete() {

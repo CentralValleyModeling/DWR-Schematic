@@ -39,11 +39,23 @@ public class SchematicPanelBase
 		return context;
 	}
 
+	/**
+	 * Unit names are compared case-insensitively: {@link SchematicContext#CFS} is lower case, while hosts
+	 * such as WRIMS (DssPluginCore.cfs/taf) and DSS series use upper case.
+	 */
+	private boolean isCfsSelected() {
+		return SchematicContext.CFS.equalsIgnoreCase(getContext().units());
+	}
+
+	private boolean isTafSelected() {
+		return SchematicContext.TAF.equalsIgnoreCase(getContext().units());
+	}
+
 	public Map<String, String>[] retrieveUndebug(String date, Map<String, Object> names) {
 		List<String> tws = getContext().getSchematicTwSelections();
 		for (int i = 0; i < tws.size() - 1; i++) {
 			if (date != null && date.equals(tws.get(i + 1))) {
-				if (getContext().units().equals(SchematicContext.CFS)) {
+				if (isCfsSelected()) {
 					if (getContext().months().size() < 12) {
 						return retrieveLongTermAverageSelectedMonths(date, names, true);
 					} else {
@@ -92,9 +104,9 @@ public class SchematicPanelBase
 							}
 							TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
 							if (tsc != null) {
-								boolean isTAFSelected = getContext().units().equalsIgnoreCase("taf");
+								boolean isTAFSelected = isTafSelected();
 								tsc = unitsConversion(isStorage, tsc, isTAFSelected, k, name);
-								if (getContext().units().equals("TAF") && tsc.units.equals("TAF") && !getContext().isTAFMonthly()) {
+								if (isTafSelected() && SchematicContext.TAF.equalsIgnoreCase(tsc.units) && !getContext().isTAFMonthly()) {
 									tsc = convertAnnualTAFData(tsc); // CB added constant IV
 								}
 								HecTime hecStartTime = new HecTime();
@@ -202,7 +214,7 @@ public class SchematicPanelBase
 						if (getContext().getDataSource().storageNames().contains(name)) {
 							isStorage = true;
 						}
-						boolean isTAFSelected = getContext().units().equalsIgnoreCase("taf");
+						boolean isTAFSelected = isTafSelected();
 						tsc = unitsConversion(isStorage, tsc, isTAFSelected, i, name);
 						ht.set(startDate);
 						hecStartTime.set(tsc.startTime);
@@ -233,6 +245,7 @@ public class SchematicPanelBase
 						}
 						if (inRange) {
 							altAverage.put(name, sum/count);
+							recordUnits(i, name, tsc.units, isCFS);
 						}
 					} catch (HecMathException e) {
 						logger.atSevere().log("Error calculating long term average for %s", name);
@@ -287,7 +300,7 @@ public class SchematicPanelBase
 						if (getContext().getDataSource().storageNames().contains(name)) {
 							isStorage = true;
 						}
-						boolean isTAFSelected = getContext().units().equalsIgnoreCase("taf");
+						boolean isTAFSelected = isTafSelected();
 						tsc = unitsConversion(isStorage, tsc, isTAFSelected, i, name);
 						ht.set(startDate);
 						hecStartTime.set(tsc.startTime);
@@ -318,6 +331,7 @@ public class SchematicPanelBase
 						}
 						if (inRange) {
 							altAverage.put(name, sum/count);
+							recordUnits(i, name, tsc.units, isCFS);
 						}
 					} catch (HecMathException e) {
 						logger.atSevere().log("Error calculating long term average for " + name, e);
@@ -325,8 +339,22 @@ public class SchematicPanelBase
 				}
 			}
 		}
-
 		return termAverage;
+	}
+
+	/**
+	 * Remembers the units of an averaged series (after any conversion) so the retrieve methods can label it.
+	 * Without this the units maps only held entries for series that {@link #unitsConversion} had converted, and
+	 * every other long-term average was shown as "value null".
+	 */
+	private void recordUnits(int study, String name, String units, boolean isCFS) {
+		if (units == null) {
+			return;
+		}
+		Map<String, String> map = isCFS
+				? getContext().getAllSchematicVariableUnitsCFS(study)
+				: getContext().getAllSchematicVariableUnitsTAF(study);
+		map.put(name, units);
 	}
 
 	public Map<String, String>[] retrieveLongTermAverage(int index, Map<String, Object> names, boolean isCFS) {
@@ -368,7 +396,7 @@ public class SchematicPanelBase
 							value = "N/A";
 						} else {
 							value = data + " " + units;
-							if (getContext().units().equals("TAF") && !getContext().isTAFMonthly()){
+							if (isTafSelected() && !getContext().isTAFMonthly()){
 								value = data * 12 + " " + units;
 							}
 						}
@@ -384,13 +412,13 @@ public class SchematicPanelBase
 								try {
 									double baseVal = Double.parseDouble(baseFields[0]);
 									double altVal = Double.parseDouble(altFields[0]);
-									if (getContext().units().equals("TAF") && !getContext().isTAFMonthly()) {
+									if (isTafSelected() && !getContext().isTAFMonthly()) {
 										baseVal = baseVal * 12;
 										altVal = altVal * 12;
 									}
 									results[k].put(name, (altVal - baseVal) + " " + baseFields[1]);
 								} catch (NumberFormatException nfe) {
-									results[k].put(name,"N/A");
+									results[k].put(name, "N/A");
 								}
 							} else {
 								results[k].put(name, value);
@@ -398,7 +426,7 @@ public class SchematicPanelBase
 						} else {
 							results[k].put(name, value);
 						}
-					} else{
+					} else {
 						value = "";
 						results[k].put(name, value);
 					}
@@ -442,7 +470,7 @@ public class SchematicPanelBase
 							value = "N/A";
 						} else {
 							value = data + " " + units;
-							if (getContext().units().equals("TAF") && !getContext().isTAFMonthly()){
+							if (isTafSelected() && !getContext().isTAFMonthly()){
 								value = data * 12 + " " + units;
 							}
 						}
@@ -458,7 +486,7 @@ public class SchematicPanelBase
 								try {
 									double baseVal = Double.parseDouble(baseFields[0]);
 									double altVal = Double.parseDouble(altFields[0]);
-									if (getContext().units().equals("TAF") && !getContext().isTAFMonthly()) {
+									if (isTafSelected() && !getContext().isTAFMonthly()) {
 										baseVal = baseVal * 12;
 										altVal = altVal * 12;
 									}
@@ -508,9 +536,9 @@ public class SchematicPanelBase
 									isStorage = true;
 								}
 								TimeSeriesContainer tsc = (TimeSeriesContainer) dataSet.getData();
-								boolean isTAFSelected = getContext().units().equalsIgnoreCase("taf");
+								boolean isTAFSelected = isTafSelected();
 								tsc = unitsConversion(isStorage, tsc, isTAFSelected, k, name);
-								if (getContext().units().equals("TAF") && tsc.units.equals("TAF") && !getContext().isTAFMonthly()) {
+								if (isTafSelected() && SchematicContext.TAF.equalsIgnoreCase(tsc.units) && !getContext().isTAFMonthly()) {
 									tsc = convertAnnualTAFData(tsc); // CB added constant IV
 								}
 								HecTime hecStartTime = new HecTime();
@@ -569,22 +597,22 @@ public class SchematicPanelBase
 
 	public TimeSeriesContainer unitsConversion(boolean isStorage, TimeSeriesContainer dataSet, boolean force, int index, String name) {
 
-		if ((getContext().units().equals("TAF") || force || isStorage)
-				&& dataSet.units.equals("CFS")) {
+		if ((isTafSelected() || force || isStorage)
+				&& SchematicContext.CFS.equalsIgnoreCase(dataSet.units)) {
 			dataSet = adjustMonthlyData(dataSet, true); // CB added constant IV FACTOR
 			// so do not need to pass a
 			// factor
-			dataSet.units = "TAF";
-			getContext().getAllSchematicVariableUnitsTAF(index).put(name, "TAF");
+			dataSet.units = SchematicContext.TAF;
+			getContext().getAllSchematicVariableUnitsTAF(index).put(name, SchematicContext.TAF);
 
-		} else if (getContext().units().equals("CFS") && dataSet.units.equals("TAF")
+		} else if (isCfsSelected() && SchematicContext.TAF.equalsIgnoreCase(dataSet.units)
 				&& !force && !isStorage) { // CB added section
 			dataSet = adjustMonthlyData(dataSet, false); // CB added constant IV
 			// FACTOR so do not
 			// need to pass a
 			// factor
-			dataSet.units = "CFS";
-			getContext().getAllSchematicVariableUnitsCFS(index).put(name, "CFS");
+			dataSet.units = SchematicContext.CFS;
+			getContext().getAllSchematicVariableUnitsCFS(index).put(name, SchematicContext.CFS);
 		}
 		return dataSet;
 	}

@@ -2,11 +2,13 @@ package gov.ca.water.jdiagram.swing;
 
 import java.awt.Component;
 import java.awt.Window;
+import java.util.function.Consumer;
+import javax.swing.Action;
 import javax.swing.JPanel;
-import javax.swing.JToolBar;
 import javax.swing.SwingUtilities;
 
 import com.mindfusion.diagramming.DiagramView;
+import gov.ca.water.jdiagram.swing.toolbars.ToolBarContributor;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
 /**
@@ -80,9 +82,19 @@ public interface PlatformHarness
 	void launchViewPart(SchematicOverview overview, DiagramView view, JPanel container);
 
 	/**
-	 * Retrieves the toolbar for the schematic.
+	 * Retrieves the Swing action consumer, provides support for adding actions to the toolbar.
 	 * Formerly implemented in SchematicEditor.contributeToEditorActionBars()
-	 * @return The toolbar. Formerly returned the Eclipse IToolBarManager.
+	 * @return The toolbar action consumer. Formerly returned the Eclipse IToolBarManager.
 	 */
-	JToolBar getToolBar();
+	Consumer<Action> getToolBarConsumer();
+
+	/**
+	 * Retrieves the toolbar target, which accepts both actions and Swing controls (date combo, search field).
+	 * The default adapts {@link #getToolBarConsumer()} and therefore drops controls; hosts with a real toolbar
+	 * should override this.
+	 * @return The toolbar contributor.
+	 */
+	default ToolBarContributor getToolBarContributor() {
+		return ToolBarContributor.of(getToolBarConsumer());
+	}
 }

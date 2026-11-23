@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -27,20 +28,25 @@ public final class DateCombo {
 
 	private JComboBox<String> dateList;
 
+	private JPanel control;
+
 	public DateCombo(SchematicPanel schematicPanel, PlatformHarness presenter) {
 		this.schematicView = schematicPanel;
 		this.presenter = presenter;
 	}
 
-	private JPanel createControl(JPanel parent) {
-		JPanel container = new JPanel();
-		GridLayout glContainer = new GridLayout(0, 1);
-		glContainer.setHgap(10);
-		glContainer.setVgap(10);
-		container.setLayout(glContainer);
-		container.add(getDateList());
-		parent.add(container);
-		return container;
+	/**
+	 * @return the panel holding the date selector, for placing on a toolbar; created on first access
+	 */
+	public JComponent getControl() {
+		if (control == null) {
+			control = new JPanel(new GridLayout(1, 1));
+			control.setName("dateCombo");
+			control.setOpaque(false);
+			control.add(getDateList());
+			control.setMaximumSize(new Dimension(160, 30));
+		}
+		return control;
 	}
 
 	private JComboBox<String> buildDateList() {

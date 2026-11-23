@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.concurrent.ConcurrentLinkedDeque;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
+import javax.swing.Action;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JToolBar;
 
 import com.mindfusion.diagramming.DiagramView;
 import gov.ca.water.jdiagram.swing.PlatformHarness;
+import gov.ca.water.jdiagram.swing.toolbars.ToolBarContributor;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
 /**
@@ -151,6 +153,15 @@ public class HarnessPresenter implements PlatformHarness
 	}
 
 	@Override
+	public Consumer<Action> getToolBarConsumer() {
+		return toolBar::add;
+	}
+
+	@Override
+	public ToolBarContributor getToolBarContributor() {
+		return ToolBarContributor.of(toolBar);
+	}
+
 	public JToolBar getToolBar() {
 		return toolBar;
 	}

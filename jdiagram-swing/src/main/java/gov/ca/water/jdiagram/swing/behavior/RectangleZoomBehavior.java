@@ -1,6 +1,7 @@
 package gov.ca.water.jdiagram.swing.behavior;
 
 import java.awt.Cursor;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
@@ -67,9 +68,9 @@ public final class RectangleZoomBehavior extends BehaviorBase {
 
 	@Override
 	protected CursorHint setMouseCursor(Point2D arg0, ByRef<Boolean> arg1) {
+		Image icon = ImageUtil.createImageIcon("images/zoom_in.png").getImage();
 		Cursor zoomRectCursor = Toolkit.getDefaultToolkit().createCustomCursor(
-				ImageUtil.createImageIcon("images/zoom_in.png").getImage(),
-				new Point(0, 0), "zoom rectangle");
+				icon, new Point(0, 0), "zoom rectangle");
 		getDiagramView().setCursor(zoomRectCursor);
 		return CursorHint.DontChange;
 	}

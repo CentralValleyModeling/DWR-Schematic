@@ -161,7 +161,7 @@ public final class SchematicContext {
 	 * Retrieves long-term average data in CFS. Formerly DssPluginCore.longTermAverageDataCFS
 	 * @return The long-term average data, keyed to the time window index.
 	 */
-	Map<Integer, List<Map<String, Double>>> getLongTermAverageDataCFS() {
+	public Map<Integer, List<Map<String, Double>>> getLongTermAverageDataCFS() {
 		return longTermCfs;
 	}
 

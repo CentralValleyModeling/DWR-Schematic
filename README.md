@@ -6,6 +6,13 @@ JDiagram was extracted from the WRIMS GUI repository into a standalone repositor
 
 This README documents the initial migration and provides historical references for future developers.
 
+## Modules
+
+- `jdiagram-core`: host-neutral schematic state (`SchematicContext`), the `SchematicDataSource` interface, and value
+  calculation (`SchematicPanelBase`).
+- `jdiagram-swing`: the Swing schematic view/editor (`SchematicPanel`, `SchematicEditor`) and the `PlatformHarness` host interface.
+- `jdiagram-legacy`: the original WRIMS GUI JDiagram code. To be removed.
+
 ## UI Test Harness
 
 `jdiagram-swing` has a `harness` source set (not included in the published jar) that runs the Swing UI against

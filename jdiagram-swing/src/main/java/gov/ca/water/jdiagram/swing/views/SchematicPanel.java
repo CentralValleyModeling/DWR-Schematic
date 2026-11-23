@@ -58,6 +58,7 @@ import gov.ca.water.jdiagram.swing.dialog.PDFOptionDialog;
 import gov.ca.water.jdiagram.swing.panel.MagnifierPanel;
 import gov.ca.water.jdiagram.swing.toolbars.DateCombo;
 import gov.ca.water.jdiagram.swing.toolbars.SearchText;
+import gov.ca.water.jdiagram.swing.toolbars.ToolBarContributor;
 
 import hec.hecmath.HecMathException;
 import hec.io.DataContainer;
@@ -274,26 +275,48 @@ public class SchematicPanel extends JComponent
 	}
 
 	private void contributeToActionBars() {
-		fillLocalToolBar(presenter.getToolBar());
+		fillLocalToolBar(presenter.getToolBarContributor());
 	}
 
-	private void fillLocalToolBar(JToolBar manager) {
-		manager.add(openSchematicAction);
-		manager.add(saveAsSchematicAction);
-		manager.add(zoomInAction);
-		manager.add(zoomOutAction);
-		manager.add(zoomNormalAction);
-		manager.add(zoomRectAction);
-		manager.add(zoomMagnifier);
-		manager.add(fontAction);
-		manager.add(decimalAction);
-		manager.add(tafTypeAction);
-		dateCombo = new DateCombo(this, presenter);
-		manager.add(dateCombo.getDateList());
-		manager.add(backwardAction);
-		manager.add(forwardAction);
-		searchText = new SearchText(this);
-		manager.add(searchText);
+	/** Toolbar contribution ids for the Swing controls. */
+	public static final String DATE_COMBO_ID = "dateCombo";
+	public static final String SEARCH_TEXT_ID = "searchText";
+
+	/**
+	 * Fills a Swing toolbar with the schematic actions, date combo and search field.
+	 */
+	public void fillLocalToolBar(JToolBar toolBar) {
+		fillLocalToolBar(ToolBarContributor.of(toolBar));
+	}
+
+	/**
+	 * Fills any toolbar (Swing {@link JToolBar}, Eclipse {@code IToolBarManager}, ...) with the schematic actions,
+	 * date combo and search field. Call on the AWT event thread after {@link #createPartControl(JPanel)}.
+	 * <p>
+	 * The date combo and search field are single Swing components, so filling a second toolbar moves them there.
+	 */
+	public void fillLocalToolBar(ToolBarContributor toolBar) {
+		if (dateCombo == null) {
+			dateCombo = new DateCombo(this, presenter);
+		}
+		if (searchText == null) {
+			searchText = new SearchText(this);
+		}
+		toolBar.addAction(openSchematicAction);
+		toolBar.addAction(saveAsSchematicAction);
+		toolBar.addAction(zoomInAction);
+		toolBar.addAction(zoomOutAction);
+		toolBar.addAction(zoomNormalAction);
+		toolBar.addAction(zoomRectAction);
+		toolBar.addAction(zoomMagnifier);
+		toolBar.addAction(fontAction);
+		toolBar.addAction(decimalAction);
+		toolBar.addAction(tafTypeAction);
+		toolBar.addComponent(DATE_COMBO_ID, dateCombo.getControl());
+		toolBar.addAction(backwardAction);
+		toolBar.addAction(forwardAction);
+		toolBar.addComponent(SEARCH_TEXT_ID, searchText);
+		toolBar.update();
 	}
 
 
