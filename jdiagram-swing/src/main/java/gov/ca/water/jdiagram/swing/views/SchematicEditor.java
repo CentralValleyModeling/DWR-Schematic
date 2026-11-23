@@ -709,11 +709,11 @@ public final class SchematicEditor extends SchematicPanel {
 			return;
 		}
 		DiagramNode alignNode = sortedNodes.getFirst();
-		java.awt.geom.Rectangle2D.Float bounds0 = alignNode.getBounds();
+		Rectangle2D.Float bounds0 = alignNode.getBounds();
 		double centerX = bounds0.getCenterX();
 		double centerY = bounds0.getCenterY();
 		DiagramNode endAlignNode = sortedNodes.getLast();
-		java.awt.geom.Rectangle2D.Float bounds1 = endAlignNode.getBounds();
+		Rectangle2D.Float bounds1 = endAlignNode.getBounds();
 		int size = nodes.size();
 		float spaceX = 1;
 		float spaceY = 1;
