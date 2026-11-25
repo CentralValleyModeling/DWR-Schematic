@@ -320,6 +320,7 @@ public final class SchematicEditor extends SchematicPanel {
 	}
 
 	private void makeEditorActions() {
+		super.makeActions();
 		exportAction = buildAction("Export Attributes", icon("export_attr.png"), e -> {
 			String fileToSave = chooseFileToExport();
 			try {
@@ -370,7 +371,7 @@ public final class SchematicEditor extends SchematicPanel {
 	}
 
 	private void contributeToEditorActionBars() {
-		fillEditorToolBar(getDataPresenter().getToolBarContributor());
+		fillEditorToolBar(getPlatformHarness().getToolBarContributor());
 	}
 
 	/**

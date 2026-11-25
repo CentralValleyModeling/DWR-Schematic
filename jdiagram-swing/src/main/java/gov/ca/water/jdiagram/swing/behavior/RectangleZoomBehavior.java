@@ -68,7 +68,7 @@ public final class RectangleZoomBehavior extends BehaviorBase {
 
 	@Override
 	protected CursorHint setMouseCursor(Point2D arg0, ByRef<Boolean> arg1) {
-		Image icon = ImageUtil.createImageIcon("images/zoom_in.png").getImage();
+		Image icon = ImageUtil.createImageIcon("icons/zoom_in.png").getImage();
 		Cursor zoomRectCursor = Toolkit.getDefaultToolkit().createCustomCursor(
 				icon, new Point(0, 0), "zoom rectangle");
 		getDiagramView().setCursor(zoomRectCursor);

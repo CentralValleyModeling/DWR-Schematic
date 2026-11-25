@@ -66,8 +66,6 @@ import rma.swing.FontChooser;
 
 import static gov.ca.water.jdiagram.swing.utils.ActionHelper.buildAction;
 import static gov.ca.water.jdiagram.swing.utils.ActionHelper.icon;
-import static gov.ca.water.jdiagram.swing.utils.ActionHelper.openIcon;
-import static gov.ca.water.jdiagram.swing.utils.ActionHelper.saveIcon;
 
 public class SchematicPanel extends JComponent
 {
@@ -75,7 +73,7 @@ public class SchematicPanel extends JComponent
 
 	private DiagramView diagramView;
 
-	private final transient PlatformHarness presenter;
+	private final transient PlatformHarness harness;
 
 	private transient Diagram diagram;
 
@@ -135,17 +133,17 @@ public class SchematicPanel extends JComponent
 
 	private static String ISMONTHLYTAF = "ismonthlytaf";
 
-	public SchematicPanel(SchematicPanelBase base, PlatformHarness presenter) {
+	public SchematicPanel(SchematicPanelBase base, PlatformHarness harness) {
 		this.base = base;
-		this.presenter = presenter;
+		this.harness = harness;
 	}
 
 	public SchematicPanelBase getBase() {
 		return base;
 	}
 
-	public PlatformHarness getDataPresenter() {
-		return presenter;
+	public PlatformHarness getPlatformHarness() {
+		return harness;
 	}
 
 	public Component getContentPane(){
@@ -216,7 +214,7 @@ public class SchematicPanel extends JComponent
 			}
 
 			public void openDSSPerspective(final String perspectiveId, final String name) {
-				presenter.showDSSPerspective();
+				harness.showDSSPerspective();
 			}
 
 			public void showDSS(String name) {
@@ -237,7 +235,7 @@ public class SchematicPanel extends JComponent
 				if(data.isEmpty()) {
 					return;
 				}
-				presenter.showDssView();
+				harness.showDssView();
 			}
 
 			@Override
@@ -268,14 +266,14 @@ public class SchematicPanel extends JComponent
 
 		overview = new SchematicOverview();
 		overview.setDiagramView(diagramView);
-		presenter.launchViewPart(overview, diagramView, swingContainer);
+		harness.launchViewPart(overview, diagramView, swingContainer);
 
 		makeActions();
 		contributeToActionBars();
 	}
 
-	private void contributeToActionBars() {
-		fillLocalToolBar(presenter.getToolBarContributor());
+	void contributeToActionBars() {
+		fillLocalToolBar(harness.getToolBarContributor());
 	}
 
 	/** Toolbar contribution ids for the Swing controls. */
@@ -297,7 +295,7 @@ public class SchematicPanel extends JComponent
 	 */
 	public void fillLocalToolBar(ToolBarContributor toolBar) {
 		if (dateCombo == null) {
-			dateCombo = new DateCombo(this, presenter);
+			dateCombo = new DateCombo(this, harness);
 		}
 		if (searchText == null) {
 			searchText = new SearchText(this);
@@ -319,11 +317,10 @@ public class SchematicPanel extends JComponent
 		toolBar.update();
 	}
 
-
-	private void makeActions() {
+	void makeActions() {
   		_zoomFactor = 100;
-		openSchematicAction = buildAction("Open", openIcon(), e -> {
-			final String file = presenter.launchFileDialog();
+		openSchematicAction = buildAction("Open", getPlatformHarness().getIconLoader().openIcon(), e -> {
+			final String file = harness.launchFileDialog();
 			if (file == null) {
 				return;
 			}
@@ -349,8 +346,8 @@ public class SchematicPanel extends JComponent
 			});
 		});
 
-		saveAsSchematicAction = buildAction("Save As", saveIcon(), e -> {
-			String file = presenter.launchFileDialog();
+		saveAsSchematicAction = buildAction("Save As", getPlatformHarness().getIconLoader().saveIcon(), e -> {
+			String file = harness.launchFileDialog();
 			if (file == null) {
 				return;
 			}
@@ -402,11 +399,11 @@ public class SchematicPanel extends JComponent
 		});
 
 		fontAction = buildAction("Font", icon("font.png"), e -> {
-			presenter.launchDialog(() -> {
-				Window window = presenter.getShell(diagramView);
+			harness.launchDialog(() -> {
+				Window window = harness.getShell(diagramView);
 				Frame frame = window instanceof Frame f ? f : null;
 				Font oldFont = getDiagram().getFont();
-				presenter.launchFontDialog();
+				harness.launchFontDialog();
 				FontChooser chooser = new FontChooser(frame, null, false, oldFont);
 				chooser.setFont(oldFont);
 				chooser.setVisible(true);
@@ -424,10 +421,10 @@ public class SchematicPanel extends JComponent
 		});
 
 		decimalAction = buildAction("Decimal", icon("decimal.png"), e -> {
-			presenter.launchDialog(() -> {
-				Window window = presenter.getShell(diagramView);
+			harness.launchDialog(() -> {
+				Window window = harness.getShell(diagramView);
 				JFrame parent = window instanceof JFrame f ? f : null;
-				DecimalDialog decimalDialog = new DecimalDialog(parent, this, presenter);
+				DecimalDialog decimalDialog = new DecimalDialog(parent, this, harness);
 				decimalDialog.openDialog();
 			});
 		});
@@ -438,7 +435,7 @@ public class SchematicPanel extends JComponent
 		}
 		getBase().getContext().setTAFMonthly(getBase().getContext().getDataSource().getPreferences().getBoolean(ISMONTHLYTAF, true));
 		tafTypeAction = buildAction("TAF Type", null, e -> {
-			presenter.launchDialog(() -> {
+			harness.launchDialog(() -> {
 				base.getContext().setTAFMonthly(!base.getContext().isTAFMonthly());
 				if (base.getContext().isTAFMonthly()) {
 					getBase().getContext().getDataSource().getPreferences().putBoolean(ISMONTHLYTAF, true);
@@ -800,8 +797,8 @@ public class SchematicPanel extends JComponent
 			if (filename.endsWith(".xml")) {
 				diagram.saveToXml(filename);
 			} else if (filename.endsWith(".pdf")) {
-				presenter.launchDialog(() -> {
-					Window window = presenter.getShell(diagramView);
+				harness.launchDialog(() -> {
+					Window window = harness.getShell(diagramView);
 					JFrame frame = window instanceof JFrame f ? f : null;
 					PDFOptionDialog dialog= new PDFOptionDialog(frame, filename, diagram, base.getContext());
 					dialog.openDialog();

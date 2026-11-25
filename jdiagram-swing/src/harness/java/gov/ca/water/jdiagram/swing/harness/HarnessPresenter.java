@@ -15,6 +15,7 @@ import javax.swing.JToolBar;
 import com.mindfusion.diagramming.DiagramView;
 import gov.ca.water.jdiagram.swing.PlatformHarness;
 import gov.ca.water.jdiagram.swing.toolbars.ToolBarContributor;
+import gov.ca.water.jdiagram.swing.utils.IconLoad;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
 /**
@@ -164,5 +165,10 @@ public class HarnessPresenter implements PlatformHarness
 
 	public JToolBar getToolBar() {
 		return toolBar;
+	}
+
+	@Override
+	public IconLoad getIconLoader() {
+		return new IconLoader();
 	}
 }

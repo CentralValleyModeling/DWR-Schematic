@@ -11,7 +11,7 @@ import javax.swing.ImageIcon;
 /**
  * Utility class for creating actions. Left non-final to allow for behavior extension.
  */
-public class ActionHelper {
+public final class ActionHelper {
 	private ActionHelper() {
 		throw new IllegalStateException("Utility class, cannot be instantiated");
 	}
@@ -20,15 +20,6 @@ public class ActionHelper {
 		URL url = ActionHelper.class.getResource("/icons/" + resource);
 		return url == null ? null : new ImageIcon(url);
 	}
-
-	public static Icon saveIcon() {
-		return icon("Save.png");
-	}
-
-	public static Icon openIcon() {
-		return icon("Open.png");
-	}
-
 
 	public static Action buildAction(String name, Icon icon, Consumer<ActionEvent> handler) {
 		Action a = new AbstractAction(name, icon) {

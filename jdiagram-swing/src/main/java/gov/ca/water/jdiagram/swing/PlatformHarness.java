@@ -9,6 +9,7 @@ import javax.swing.SwingUtilities;
 
 import com.mindfusion.diagramming.DiagramView;
 import gov.ca.water.jdiagram.swing.toolbars.ToolBarContributor;
+import gov.ca.water.jdiagram.swing.utils.IconLoad;
 import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 
 /**
@@ -97,4 +98,10 @@ public interface PlatformHarness
 	default ToolBarContributor getToolBarContributor() {
 		return ToolBarContributor.of(getToolBarConsumer());
 	}
+
+	/**
+	 * Retrieves icon loading interface. Provides access to save and load icons.
+	 * @return The icon loader.
+	 */
+	IconLoad getIconLoader();
 }
