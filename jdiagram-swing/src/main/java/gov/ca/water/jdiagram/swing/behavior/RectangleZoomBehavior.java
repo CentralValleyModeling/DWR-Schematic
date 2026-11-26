@@ -21,7 +21,7 @@ import gov.ca.water.jdiagram.swing.views.SchematicOverview;
 public final class RectangleZoomBehavior extends BehaviorBase {
 
 	SchematicOverview overview;
-	
+
 	public RectangleZoomBehavior(DiagramView flowChart, SchematicOverview overview) {
 		super(flowChart);
 		this.overview = overview;
@@ -68,7 +68,7 @@ public final class RectangleZoomBehavior extends BehaviorBase {
 
 	@Override
 	protected CursorHint setMouseCursor(Point2D arg0, ByRef<Boolean> arg1) {
-		Image icon = ImageUtil.createImageIcon("icons/zoom_in.png").getImage();
+		Image icon = ImageUtil.createImageIcon("zoom_in.png").getImage();
 		Cursor zoomRectCursor = Toolkit.getDefaultToolkit().createCustomCursor(
 				icon, new Point(0, 0), "zoom rectangle");
 		getDiagramView().setCursor(zoomRectCursor);
