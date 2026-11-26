@@ -4,6 +4,64 @@ plugins {
     id 'library.publishing-conventions'
 }
 
-dependencies {
+// Interactive test harness: fake host/data source + a launcher frame. Kept out of the published jar.
+sourceSets {
+    harness {
+        compileClasspath += sourceSets.main.output
+        runtimeClasspath += sourceSets.main.output
+    }
+    test {
+        compileClasspath += sourceSets.harness.output
+        runtimeClasspath += sourceSets.harness.output
+    }
+}
 
+configurations {
+    harnessImplementation.extendsFrom implementation
+    harnessRuntimeOnly.extendsFrom runtimeOnly
+}
+
+dependencies {
+    implementation fileTree(dir: '../jdiagram-legacy/src/main/resources/jars/', include: ['jdiagram-4.3.1.jar'])
+
+    implementation project(":jdiagram-core")
+
+    implementation(libs.hec.monolith)
+}
+
+def licenseKeyProperty = 'wrims.mindfusion.licenseKey'
+
+tasks.register('runHarness', JavaExec) {
+    group = 'application'
+    description = 'Launches the interactive Swing UI harness. Use -PharnessArgs="--editor" to open the SchematicEditor.'
+    classpath = sourceSets.harness.runtimeClasspath
+    mainClass = 'gov.ca.water.jdiagram.swing.harness.HarnessApp'
+    def harnessArgs = findProperty('harnessArgs')?.toString()?.trim()
+    if (harnessArgs) {
+        args harnessArgs.split(/\s+/)
+    }
+    def key = findProperty('mindfusionLicenseKey')?.toString()
+    if (key) {
+        systemProperty licenseKeyProperty, key
+    }
+}
+
+// UI tests open real windows; keep them out of the default `test` task (which also runs in CI)
+// and run them on demand with `gradlew :jdiagram-swing:uiTest`.
+test {
+    useJUnitPlatform {
+        excludeTags 'ui'
+    }
+}
+
+tasks.register('uiTest', Test) {
+    group = 'verification'
+    description = 'Runs the Swing UI smoke tests (requires a display).'
+    testClassesDirs = sourceSets.test.output.classesDirs
+    classpath = sourceSets.test.runtimeClasspath
+    useJUnitPlatform {
+        includeTags 'ui'
+    }
+    shouldRunAfter test
+    systemProperty 'java.awt.headless', 'false'
 }

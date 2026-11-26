@@ -5,5 +5,7 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.hec.monolith)
 
+    implementation fileTree(dir: '../jdiagram-legacy/src/main/resources/jars/', include: ['jdiagram-4.3.1.jar'])
 }
